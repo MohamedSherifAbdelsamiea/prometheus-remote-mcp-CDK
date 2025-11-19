@@ -136,8 +136,8 @@ export class APIGatewayLambdaStack extends cdk.Stack {
       }
     };
 
-    // Write config file to project root
-    const configPath = path.join(__dirname, '..', 'mcp-server-config.json');
+    // Write config file to current working directory
+    const configPath = 'mcp-server-config.json';
     fs.writeFileSync(configPath, JSON.stringify(mcpConfig, null, 2));
 
     // Output config file location
