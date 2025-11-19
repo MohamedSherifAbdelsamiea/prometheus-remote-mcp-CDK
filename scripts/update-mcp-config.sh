@@ -7,7 +7,7 @@ set -e
 
 PROFILE=${1:-default}
 CONFIG_FILE="mcp-server-config.json"
-REGION="us-west-2"
+REGION=$(aws configure get region --profile "$PROFILE" 2>/dev/null || aws configure get region || echo "us-east-1")
 
 echo "🔍 Updating MCP configuration with actual client secret..."
 
