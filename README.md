@@ -296,6 +296,21 @@ npm run destroy                # Destroy all stacks
 
 ## 🚨 **Troubleshooting**
 
+### Cognito Domain Conflict Error
+```bash
+# Error: Domain already associated with another user pool
+# This happens when the domain generation creates a conflicting name
+
+# Solution: Set a unique domain prefix before deployment
+export COGNITO_DOMAIN_PREFIX=your-unique-prefix-$(date +%s)-$(openssl rand -hex 4)
+
+# Clean up failed stack
+cdk destroy PrometheusLambdaMCPCognitoStack --region us-west-2 --profile your-profile
+
+# Deploy with unique domain
+cdk deploy --app 'npx ts-node bin/lambda-app.ts' --all --region us-west-2 --profile your-profile
+```
+
 ### Bootstrap Error
 ```bash
 # Error: SSM parameter /cdk-bootstrap/hnb659fds/version not found
