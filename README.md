@@ -92,15 +92,14 @@ Deployment Order:
 # 1. Install dependencies
 npm install
 
-# 2. Set AWS profile and region (replace with your values)
+# 2. Set AWS profile (replace with your values)
 export AWS_PROFILE=your-profile
-export CDK_DEFAULT_REGION=us-west-2  # Optional: defaults to profile region
 
-# 3. Bootstrap CDK (first time only)
-cdk bootstrap
+# 3. Bootstrap CDK (first time only) - specify region explicitly
+cdk bootstrap --region us-west-2
 
-# 4. Deploy all stacks
-cdk deploy --app 'npx ts-node bin/lambda-app.ts' --all
+# 4. Deploy all stacks - ALWAYS use --region flag to avoid conflicts
+cdk deploy --app 'npx ts-node bin/lambda-app.ts' --all --region us-west-2
 
 # 5. Update config with client secret (use same profile)
 ./scripts/update-mcp-config.sh your-profile
@@ -141,7 +140,7 @@ aws sts get-caller-identity --profile your-profile-name
 **Domain Conflicts**: If you get a Cognito domain error, set a custom domain prefix:
 ```bash
 export COGNITO_DOMAIN_PREFIX=my-unique-prefix-$(date +%s)
-cdk deploy --app 'npx ts-node bin/lambda-app.ts' --all
+cdk deploy --app 'npx ts-node bin/lambda-app.ts' --all --region us-west-2
 ```
 
 ### 2. Setup Environment
@@ -152,29 +151,28 @@ cdk deploy --app 'npx ts-node bin/lambda-app.ts' --all
 # Install dependencies
 npm install
 
-# Set AWS profile and region for this session
+# Set AWS profile for this session
 export AWS_PROFILE=your-profile-name
-export CDK_DEFAULT_REGION=us-west-2  # Optional: specify deployment region
 ```
 
 ### 3. Bootstrap CDK (First Time Only)
 ```bash
-# Bootstrap CDK in your AWS account/region
-cdk bootstrap
+# Bootstrap CDK in your AWS account/region - specify region explicitly
+cdk bootstrap --region us-west-2
 
 # Verify bootstrap
-aws ssm get-parameter --name /cdk-bootstrap/hnb659fds/version
+aws ssm get-parameter --name /cdk-bootstrap/hnb659fds/version --region us-west-2
 ```
 
 ### 4. Deploy Infrastructure
 ```bash
-# Deploy all stacks at once
-cdk deploy --app 'npx ts-node bin/lambda-app.ts' --all
+# Deploy all stacks at once - ALWAYS use --region flag to avoid conflicts
+cdk deploy --app 'npx ts-node bin/lambda-app.ts' --all --region us-west-2
 
 # OR deploy individually
-cdk deploy --app 'npx ts-node bin/lambda-app.ts' PrometheusLambdaMCPCognitoStack
-cdk deploy --app 'npx ts-node bin/lambda-app.ts' PrometheusLambdaMCPStack
-cdk deploy --app 'npx ts-node bin/lambda-app.ts' PrometheusLambdaMCPAPIGatewayStack
+cdk deploy --app 'npx ts-node bin/lambda-app.ts' PrometheusLambdaMCPCognitoStack --region us-west-2
+cdk deploy --app 'npx ts-node bin/lambda-app.ts' PrometheusLambdaMCPStack --region us-west-2
+cdk deploy --app 'npx ts-node bin/lambda-app.ts' PrometheusLambdaMCPAPIGatewayStack --region us-west-2
 ```
 
 ### 5. Configure Client Secret
@@ -222,7 +220,6 @@ The CDK deployment supports the following environment variables for customizatio
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `AWS_PROFILE` | AWS profile to use for deployment | Required |
-| `CDK_DEFAULT_REGION` | AWS region for deployment | Uses profile default region |
 | `COGNITO_DOMAIN_PREFIX` | Cognito domain prefix | `prometheus-mcp-{random}` |
 | `USER_POOL_NAME` | Cognito User Pool name | `prometheus-mcp-oauth-pool` |
 | `RESOURCE_SERVER_ID` | OAuth resource server identifier | `prometheus-mcp-server` |
@@ -231,13 +228,14 @@ The CDK deployment supports the following environment variables for customizatio
 | `OAUTH_SCOPE` | OAuth scopes | `prometheus-mcp-server/read prometheus-mcp-server/write` |
 
 ```bash
-# Example with custom values
+# Example with custom values - ALWAYS use --region flag
 export AWS_PROFILE=my-aws-profile
-export CDK_DEFAULT_REGION=eu-west-1
 export COGNITO_DOMAIN_PREFIX=my-custom-prefix
 export USER_POOL_NAME=my-mcp-pool
-cdk deploy --app 'npx ts-node bin/lambda-app.ts' --all
+cdk deploy --app 'npx ts-node bin/lambda-app.ts' --all --region us-west-2
 ```
+
+**⚠️ IMPORTANT**: Always use the `--region` flag with CDK commands to avoid deployment conflicts. The `CDK_DEFAULT_REGION` environment variable is overridden by your AWS profile's default region.
 
 ## 🎯 **What Gets Deployed**
 
