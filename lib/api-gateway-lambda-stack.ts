@@ -29,7 +29,6 @@ export class APIGatewayLambdaStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(30),
       environment: {
         USER_POOL_ID: userPool.userPoolId,
-        AWS_REGION: this.region,
       },
     });
 

@@ -92,8 +92,9 @@ Deployment Order:
 # 1. Install dependencies
 npm install
 
-# 2. Set AWS profile (replace 'your-profile' with your AWS profile name)
+# 2. Set AWS profile and region (replace with your values)
 export AWS_PROFILE=your-profile
+export CDK_DEFAULT_REGION=us-west-2  # Optional: defaults to profile region
 
 # 3. Bootstrap CDK (first time only)
 cdk bootstrap
@@ -129,6 +130,7 @@ aws configure --profile your-profile-name
 
 # Or use existing profile
 export AWS_PROFILE=your-existing-profile
+export CDK_DEFAULT_REGION=us-west-2  # Optional: override profile region
 
 # Verify profile works
 aws sts get-caller-identity --profile your-profile-name
@@ -137,16 +139,16 @@ aws sts get-caller-identity --profile your-profile-name
 **Why profiles matter**: Without specifying a profile, the deployment might conflict with existing Cognito User Pools or other resources in your default AWS account.
 
 ### 2. Setup Environment
-### 2. Setup Environment
 ```bash
-# Clone/navigate to project
-cd lambda-mcp-cdk
+# Navigate to project directory (if not already there)
+# cd path/to/lambda-mcp-cdk
 
 # Install dependencies
 npm install
 
-# Set AWS profile for this session
+# Set AWS profile and region for this session
 export AWS_PROFILE=your-profile-name
+export CDK_DEFAULT_REGION=us-west-2  # Optional: specify deployment region
 ```
 
 ### 3. Bootstrap CDK (First Time Only)
@@ -211,7 +213,7 @@ The CDK deployment supports the following environment variables for customizatio
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `AWS_PROFILE` | AWS profile to use for deployment | Required |
-| `CDK_DEFAULT_REGION` | AWS region for deployment | Required |
+| `CDK_DEFAULT_REGION` | AWS region for deployment | Uses profile default region |
 | `COGNITO_DOMAIN_PREFIX` | Cognito domain prefix | `prometheus-mcp-{random}` |
 | `USER_POOL_NAME` | Cognito User Pool name | `prometheus-mcp-oauth-pool` |
 | `RESOURCE_SERVER_ID` | OAuth resource server identifier | `prometheus-mcp-server` |
@@ -221,6 +223,8 @@ The CDK deployment supports the following environment variables for customizatio
 
 ```bash
 # Example with custom values
+export AWS_PROFILE=my-aws-profile
+export CDK_DEFAULT_REGION=eu-west-1
 export COGNITO_DOMAIN_PREFIX=my-custom-prefix
 export USER_POOL_NAME=my-mcp-pool
 cdk deploy --app 'npx ts-node bin/lambda-app.ts' --all
