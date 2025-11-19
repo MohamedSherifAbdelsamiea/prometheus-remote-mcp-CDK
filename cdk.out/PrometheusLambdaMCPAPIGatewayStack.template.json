@@ -40,7 +40,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-542062284609-us-west-2",
-     "S3Key": "19812c8e0a3e64cc08fa8070632ee8b572ecc7edc1b878dd73e55b9166cff2c9.zip"
+     "S3Key": "1ab5cd924f350c90f24a8b079999f4655b80b4aab1025771aebaea8fb69f1826.zip"
     },
     "Handler": "jwt-authorizer.lambda_handler",
     "Role": {
@@ -57,7 +57,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "PrometheusLambdaMCPAPIGatewayStack/JWTAuthorizer/Resource",
-    "aws:asset:path": "asset.19812c8e0a3e64cc08fa8070632ee8b572ecc7edc1b878dd73e55b9166cff2c9",
+    "aws:asset:path": "asset.1ab5cd924f350c90f24a8b079999f4655b80b4aab1025771aebaea8fb69f1826",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }

@@ -1,31 +1,31 @@
 {
   "version": "48.0.0",
   "files": {
-    "19812c8e0a3e64cc08fa8070632ee8b572ecc7edc1b878dd73e55b9166cff2c9": {
+    "1ab5cd924f350c90f24a8b079999f4655b80b4aab1025771aebaea8fb69f1826": {
       "displayName": "JWTAuthorizer/Code",
       "source": {
-        "path": "asset.19812c8e0a3e64cc08fa8070632ee8b572ecc7edc1b878dd73e55b9166cff2c9",
+        "path": "asset.1ab5cd924f350c90f24a8b079999f4655b80b4aab1025771aebaea8fb69f1826",
         "packaging": "zip"
       },
       "destinations": {
-        "542062284609-us-west-2-fde73e39": {
+        "542062284609-us-west-2-727f84fc": {
           "bucketName": "cdk-hnb659fds-assets-542062284609-us-west-2",
-          "objectKey": "19812c8e0a3e64cc08fa8070632ee8b572ecc7edc1b878dd73e55b9166cff2c9.zip",
+          "objectKey": "1ab5cd924f350c90f24a8b079999f4655b80b4aab1025771aebaea8fb69f1826.zip",
           "region": "us-west-2",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::542062284609:role/cdk-hnb659fds-file-publishing-role-542062284609-us-west-2"
         }
       }
     },
-    "910a8229cb3618bd08843ed7d6506d6e05ad8d3bd3067df869e3a8f5ccb4db3a": {
+    "2f5e87605a62f614d2c0950b2ac4dea895758b36ce16367df74ee462ebf649ca": {
       "displayName": "PrometheusLambdaMCPAPIGatewayStack Template",
       "source": {
         "path": "PrometheusLambdaMCPAPIGatewayStack.template.json",
         "packaging": "file"
       },
       "destinations": {
-        "542062284609-us-west-2-ed93ac4a": {
+        "542062284609-us-west-2-c7f58501": {
           "bucketName": "cdk-hnb659fds-assets-542062284609-us-west-2",
-          "objectKey": "910a8229cb3618bd08843ed7d6506d6e05ad8d3bd3067df869e3a8f5ccb4db3a.json",
+          "objectKey": "2f5e87605a62f614d2c0950b2ac4dea895758b36ce16367df74ee462ebf649ca.json",
           "region": "us-west-2",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::542062284609:role/cdk-hnb659fds-file-publishing-role-542062284609-us-west-2"
         }
