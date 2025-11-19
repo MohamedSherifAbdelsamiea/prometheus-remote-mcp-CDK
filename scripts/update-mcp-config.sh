@@ -19,7 +19,7 @@ fi
 
 # Extract client ID and user pool ID from config
 CLIENT_ID=$(jq -r '.authorization_configuration.client_id' "$CONFIG_FILE")
-USER_POOL_ID=$(aws cognito-idp list-user-pools --max-items 10 --profile "$PROFILE" --region "$REGION" --query "UserPools[?Name=='prometheus-mcp-oauth-pool'].Id" --output text)
+USER_POOL_ID=$(aws cognito-idp list-user-pools --max-results 10 --profile "$PROFILE" --region "$REGION" --query "UserPools[?Name=='prometheus-mcp-oauth-pool'].Id" --output text)
 
 if [ -z "$USER_POOL_ID" ]; then
     echo "❌ Could not find Cognito User Pool. Make sure it's deployed."
