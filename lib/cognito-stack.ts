@@ -11,12 +11,13 @@ export class CognitoStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // Generate globally unique domain prefix to avoid conflicts across all AWS accounts
+    // Generate globally unique domain prefix with multiple entropy sources
     const timestamp = Date.now().toString();
-    const accountSuffix = this.account?.slice(-6) || 'xxxxxx';
-    const randomSuffix = Math.random().toString(36).substring(2, 8);
-    const regionCode = this.region?.replace('-', '') || 'useast1';
-    const domainPrefix = process.env.COGNITO_DOMAIN_PREFIX || `mcp-${regionCode}-${accountSuffix}-${timestamp}-${randomSuffix}`;
+    const accountSuffix = this.account?.slice(-8) || 'xxxxxxxx';
+    const randomSuffix = Math.random().toString(36).substring(2, 10);
+    const regionCode = this.region?.replace(/[^a-z0-9]/g, '') || 'useast1';
+    const processId = process.pid.toString(36);
+    const domainPrefix = process.env.COGNITO_DOMAIN_PREFIX || `mcp-${regionCode}-${accountSuffix}-${timestamp}-${randomSuffix}-${processId}`;
 
     // Cognito User Pool
     this.userPool = new cognito.UserPool(this, 'PrometheusUserPool', {
