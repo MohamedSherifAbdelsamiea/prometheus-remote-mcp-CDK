@@ -11,11 +11,11 @@ export class CognitoStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const domainPrefix = process.env.COGNITO_DOMAIN_PREFIX || 'prometheus-mcp-oauth-v2n2x';
+    const domainPrefix = process.env.COGNITO_DOMAIN_PREFIX || `prometheus-mcp-${Math.random().toString(36).substring(2, 8)}`;
 
     // Cognito User Pool
     this.userPool = new cognito.UserPool(this, 'PrometheusUserPool', {
-      userPoolName: 'prometheus-mcp-oauth-pool',
+      userPoolName: process.env.USER_POOL_NAME || 'prometheus-mcp-oauth-pool',
       selfSignUpEnabled: false,
       signInAliases: {
         email: true,
@@ -36,7 +36,7 @@ export class CognitoStack extends cdk.Stack {
 
     // Resource Server with custom scopes for M2M
     const resourceServer = this.userPool.addResourceServer('MCPResourceServer', {
-      identifier: 'prometheus-mcp-server',
+      identifier: process.env.RESOURCE_SERVER_ID || 'prometheus-mcp-server',
       userPoolResourceServerName: 'Prometheus MCP Server',
       scopes: [
         {
@@ -69,10 +69,10 @@ export class CognitoStack extends cdk.Stack {
           cognito.OAuthScope.PROFILE,
         ],
         callbackUrls: [
-          'https://prometheus.v2n2x.com/oauth2/idpresponse',
+          process.env.CALLBACK_URL || 'https://localhost:3000/oauth2/idpresponse',
         ],
         logoutUrls: [
-          'https://prometheus.v2n2x.com/',
+          process.env.LOGOUT_URL || 'https://localhost:3000/',
         ],
       },
     });
