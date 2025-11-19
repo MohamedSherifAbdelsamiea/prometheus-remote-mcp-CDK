@@ -1,0 +1,36 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "19812c8e0a3e64cc08fa8070632ee8b572ecc7edc1b878dd73e55b9166cff2c9": {
+      "displayName": "JWTAuthorizer/Code",
+      "source": {
+        "path": "asset.19812c8e0a3e64cc08fa8070632ee8b572ecc7edc1b878dd73e55b9166cff2c9",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "542062284609-us-west-2-fde73e39": {
+          "bucketName": "cdk-hnb659fds-assets-542062284609-us-west-2",
+          "objectKey": "19812c8e0a3e64cc08fa8070632ee8b572ecc7edc1b878dd73e55b9166cff2c9.zip",
+          "region": "us-west-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::542062284609:role/cdk-hnb659fds-file-publishing-role-542062284609-us-west-2"
+        }
+      }
+    },
+    "910a8229cb3618bd08843ed7d6506d6e05ad8d3bd3067df869e3a8f5ccb4db3a": {
+      "displayName": "PrometheusLambdaMCPAPIGatewayStack Template",
+      "source": {
+        "path": "PrometheusLambdaMCPAPIGatewayStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "542062284609-us-west-2-ed93ac4a": {
+          "bucketName": "cdk-hnb659fds-assets-542062284609-us-west-2",
+          "objectKey": "910a8229cb3618bd08843ed7d6506d6e05ad8d3bd3067df869e3a8f5ccb4db3a.json",
+          "region": "us-west-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::542062284609:role/cdk-hnb659fds-file-publishing-role-542062284609-us-west-2"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

@@ -1,0 +1,258 @@
+{
+ "Description": "Cognito User Pool and OAuth configuration for Lambda MCP",
+ "Resources": {
+  "PrometheusUserPool8927C6A0": {
+   "Type": "AWS::Cognito::UserPool",
+   "Properties": {
+    "AccountRecoverySetting": {
+     "RecoveryMechanisms": [
+      {
+       "Name": "verified_email",
+       "Priority": 1
+      }
+     ]
+    },
+    "AdminCreateUserConfig": {
+     "AllowAdminCreateUserOnly": true
+    },
+    "AutoVerifiedAttributes": [
+     "email"
+    ],
+    "EmailVerificationMessage": "The verification code to your new account is {####}",
+    "EmailVerificationSubject": "Verify your new account",
+    "Policies": {
+     "PasswordPolicy": {
+      "MinimumLength": 12,
+      "RequireLowercase": true,
+      "RequireNumbers": true,
+      "RequireSymbols": true,
+      "RequireUppercase": true
+     }
+    },
+    "SmsVerificationMessage": "The verification code to your new account is {####}",
+    "UserPoolName": "prometheus-mcp-lambda-pool",
+    "UsernameAttributes": [
+     "email"
+    ],
+    "VerificationMessageTemplate": {
+     "DefaultEmailOption": "CONFIRM_WITH_CODE",
+     "EmailMessage": "The verification code to your new account is {####}",
+     "EmailSubject": "Verify your new account",
+     "SmsMessage": "The verification code to your new account is {####}"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "PrometheusLambdaCognitoStack/PrometheusUserPool/Resource"
+   }
+  },
+  "PrometheusUserPoolMCPResourceServer8885C114": {
+   "Type": "AWS::Cognito::UserPoolResourceServer",
+   "Properties": {
+    "Identifier": "prometheus-mcp-server",
+    "Name": "Prometheus MCP Server",
+    "Scopes": [
+     {
+      "ScopeDescription": "Read access to MCP server",
+      "ScopeName": "read"
+     },
+     {
+      "ScopeDescription": "Write access to MCP server",
+      "ScopeName": "write"
+     }
+    ],
+    "UserPoolId": {
+     "Ref": "PrometheusUserPool8927C6A0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PrometheusLambdaCognitoStack/PrometheusUserPool/MCPResourceServer/Resource"
+   }
+  },
+  "PrometheusUserPoolWebAppClient1719D6DC": {
+   "Type": "AWS::Cognito::UserPoolClient",
+   "Properties": {
+    "AllowedOAuthFlows": [
+     "code"
+    ],
+    "AllowedOAuthFlowsUserPoolClient": true,
+    "AllowedOAuthScopes": [
+     "openid",
+     "email",
+     "profile"
+    ],
+    "CallbackURLs": [
+     "https://prometheus.v2n2x.com/oauth2/idpresponse"
+    ],
+    "ClientName": "web-app-client",
+    "ExplicitAuthFlows": [
+     "ALLOW_USER_PASSWORD_AUTH",
+     "ALLOW_USER_SRP_AUTH",
+     "ALLOW_REFRESH_TOKEN_AUTH"
+    ],
+    "GenerateSecret": true,
+    "LogoutURLs": [
+     "https://prometheus.v2n2x.com/"
+    ],
+    "SupportedIdentityProviders": [
+     "COGNITO"
+    ],
+    "UserPoolId": {
+     "Ref": "PrometheusUserPool8927C6A0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PrometheusLambdaCognitoStack/PrometheusUserPool/WebAppClient/Resource"
+   }
+  },
+  "PrometheusUserPoolMCPDomain667596D1": {
+   "Type": "AWS::Cognito::UserPoolDomain",
+   "Properties": {
+    "Domain": "prometheus-mcp-lambda-027635",
+    "UserPoolId": {
+     "Ref": "PrometheusUserPool8927C6A0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PrometheusLambdaCognitoStack/PrometheusUserPool/MCPDomain/Resource"
+   }
+  },
+  "M2MClient361CC3A8": {
+   "Type": "AWS::Cognito::UserPoolClient",
+   "Properties": {
+    "AllowedOAuthFlows": [
+     "client_credentials"
+    ],
+    "AllowedOAuthFlowsUserPoolClient": true,
+    "AllowedOAuthScopes": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        {
+         "Ref": "PrometheusUserPoolMCPResourceServer8885C114"
+        },
+        "/read"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        {
+         "Ref": "PrometheusUserPoolMCPResourceServer8885C114"
+        },
+        "/write"
+       ]
+      ]
+     }
+    ],
+    "ClientName": "m2m-client",
+    "ExplicitAuthFlows": [
+     "ALLOW_REFRESH_TOKEN_AUTH"
+    ],
+    "GenerateSecret": true,
+    "SupportedIdentityProviders": [
+     "COGNITO"
+    ],
+    "UserPoolId": {
+     "Ref": "PrometheusUserPool8927C6A0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PrometheusLambdaCognitoStack/M2MClient/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/12Pyw6CMBBFv8V9O0qNX4B7DcS1wTKagdIxfeCC8O9isKZxNfeeezajQKkD7DbNy0vd9tLQDaY6NLoXC7pqflgKDNPFozszG1He7S+nUKHn6DTW6EZ0ufK3JFwaQhty8UtSPfLQkM2FlcwfdIrhGcMsLLcInd+Oag9FsTzReSLpog00IFTrfQPUWGC14QAAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "PrometheusLambdaCognitoStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "UserPoolId": {
+   "Description": "Cognito User Pool ID",
+   "Value": {
+    "Ref": "PrometheusUserPool8927C6A0"
+   }
+  },
+  "WebClientId": {
+   "Description": "Web App Client ID (for ALB)",
+   "Value": {
+    "Ref": "PrometheusUserPoolWebAppClient1719D6DC"
+   }
+  },
+  "M2MClientId": {
+   "Description": "M2M Client ID (for machines)",
+   "Value": {
+    "Ref": "M2MClient361CC3A8"
+   }
+  },
+  "CognitoDomain": {
+   "Description": "Cognito Domain",
+   "Value": {
+    "Ref": "PrometheusUserPoolMCPDomain667596D1"
+   }
+  },
+  "TokenEndpoint": {
+   "Description": "OAuth Token Endpoint (for M2M)",
+   "Value": "https://prometheus-mcp-lambda-027635.auth.us-west-2.amazoncognito.com/oauth2/token"
+  },
+  "ExportsOutputRefPrometheusUserPool8927C6A095B4E685": {
+   "Value": {
+    "Ref": "PrometheusUserPool8927C6A0"
+   },
+   "Export": {
+    "Name": "PrometheusLambdaCognitoStack:ExportsOutputRefPrometheusUserPool8927C6A095B4E685"
+   }
+  },
+  "ExportsOutputRefM2MClient361CC3A8E256627B": {
+   "Value": {
+    "Ref": "M2MClient361CC3A8"
+   },
+   "Export": {
+    "Name": "PrometheusLambdaCognitoStack:ExportsOutputRefM2MClient361CC3A8E256627B"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}
