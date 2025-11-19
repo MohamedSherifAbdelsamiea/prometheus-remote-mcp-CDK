@@ -54,6 +54,25 @@ echo "🔗 MCP Endpoint: $(jq -r '.endpoint' "$CONFIG_FILE")"
 echo "🔑 Client ID: $(jq -r '.authorization_configuration.client_id' "$CONFIG_FILE")"
 echo "🌐 Token URL: $(jq -r '.authorization_configuration.exchange_url' "$CONFIG_FILE")"
 
+# Update test script if it exists
+TEST_SCRIPT="test_lambda_mcp_endpoint.py"
+if [ -f "$TEST_SCRIPT" ]; then
+    echo "📝 Updating test script..."
+    
+    # Extract values
+    TOKEN_URL=$(jq -r '.authorization_configuration.exchange_url' "$CONFIG_FILE")
+    MCP_URL=$(jq -r '.endpoint' "$CONFIG_FILE")
+    
+    # Update test script
+    sed -i.bak "s|https://.*\.auth\..*\.amazoncognito\.com/oauth2/token|$TOKEN_URL|g" "$TEST_SCRIPT"
+    sed -i.bak "s|https://.*\.execute-api\..*\.amazonaws\.com/.*/mcp|$MCP_URL|g" "$TEST_SCRIPT"
+    sed -i.bak "s|\"[0-9a-z]\{26\}\"|\"$CLIENT_ID\"|g" "$TEST_SCRIPT"
+    sed -i.bak "s|\"[a-z0-9]\{52\}\"|\"$CLIENT_SECRET\"|g" "$TEST_SCRIPT"
+    
+    rm -f "${TEST_SCRIPT}.bak"
+    echo "✅ Updated $TEST_SCRIPT"
+fi
+
 # Test token retrieval
 echo ""
 echo "🧪 Testing token retrieval..."
