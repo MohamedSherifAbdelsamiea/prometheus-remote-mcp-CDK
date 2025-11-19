@@ -27,6 +27,10 @@ export class APIGatewayLambdaStack extends cdk.Stack {
       handler: 'jwt-authorizer.lambda_handler',
       code: lambda.Code.fromAsset('lambda'),
       timeout: cdk.Duration.seconds(30),
+      environment: {
+        USER_POOL_ID: userPool.userPoolId,
+        AWS_REGION: this.region,
+      },
     });
 
     // API Gateway
@@ -95,7 +99,7 @@ export class APIGatewayLambdaStack extends cdk.Stack {
           },
           {
             key: "scope",
-            value: "prometheus-mcp-server/read prometheus-mcp-server/write"
+            value: process.env.OAUTH_SCOPE || "prometheus-mcp-server/read prometheus-mcp-server/write"
           }
         ]
       },
