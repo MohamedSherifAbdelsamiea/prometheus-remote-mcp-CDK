@@ -211,6 +211,26 @@ curl -X POST $(jq -r '.endpoint' mcp-server-config.json) \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "tools/list", "id": 1}'
+
+# Advanced testing with Python script
+python3 test_lambda_mcp_endpoint.py
+```
+
+### 7. Python Test Script
+The included `test_lambda_mcp_endpoint.py` script provides comprehensive testing:
+
+```bash
+# Install dependencies
+pip install strands-ai requests
+
+# Run comprehensive tests
+python3 test_lambda_mcp_endpoint.py
+
+# The script tests:
+# - Direct HTTP calls to MCP endpoint
+# - OAuth token retrieval and validation
+# - All 5 MCP tools (GetAvailableWorkspaces, ExecuteQuery, etc.)
+# - Integration with Strands Agent framework
 ```
 
 ## ⚙️ **Environment Variables**
