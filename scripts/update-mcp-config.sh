@@ -6,8 +6,6 @@
 set -e
 
 PROFILE=${1:-default}
-CONFIG_FILE="mcp-server-config.json"
-REGION="us-west-2"
 
 echo "🔍 Updating MCP configuration with actual client secret..."
 
@@ -17,12 +15,30 @@ if [ ! -f "$CONFIG_FILE" ]; then
     exit 1
 fi
 
-# Extract client ID and user pool ID from config
-CLIENT_ID=$(jq -r '.authorization_configuration.client_id' "$CONFIG_FILE")
-USER_POOL_ID=$(aws cognito-idp list-user-pools --max-results 10 --profile "$PROFILE" --region "$REGION" --query "UserPools[?Name=='prometheus-mcp-oauth-pool'].Id" --output text)
+# Get client ID and user pool ID from CloudFormation outputs
+COGNITO_STACK_NAME="PrometheusLambdaMCPCognitoStack"
 
-if [ -z "$USER_POOL_ID" ]; then
-    echo "❌ Could not find Cognito User Pool. Make sure it's deployed."
+CLIENT_ID=$(aws cloudformation describe-stacks \
+    --stack-name "$COGNITO_STACK_NAME" \
+    --profile "$PROFILE" \
+    --region "$REGION" \
+    --query "Stacks[0].Outputs[?OutputKey=='M2MClientId'].OutputValue" \
+    --output text)
+
+USER_POOL_ID=$(aws cloudformation describe-stacks \
+    --stack-name "$COGNITO_STACK_NAME" \
+    --profile "$PROFILE" \
+    --region "$REGION" \
+    --query "Stacks[0].Outputs[?OutputKey=='UserPoolId'].OutputValue" \
+    --output text)
+
+if [ -z "$USER_POOL_ID" ] || [ "$USER_POOL_ID" = "None" ]; then
+    echo "❌ Could not find Cognito User Pool from CloudFormation stack: $COGNITO_STACK_NAME"
+    exit 1
+fi
+
+if [ -z "$CLIENT_ID" ] || [ "$CLIENT_ID" = "None" ]; then
+    echo "❌ Could not find M2M Client ID from CloudFormation stack: $COGNITO_STACK_NAME"
     exit 1
 fi
 
@@ -44,9 +60,11 @@ if [ "$CLIENT_SECRET" = "None" ] || [ -z "$CLIENT_SECRET" ]; then
     exit 1
 fi
 
-# Update config file
+# Update config file with actual values
 echo "📝 Updating config file..."
-jq --arg secret "$CLIENT_SECRET" '.authorization_configuration.client_secret = $secret' "$CONFIG_FILE" > "${CONFIG_FILE}.tmp"
+jq --arg client_id "$CLIENT_ID" --arg secret "$CLIENT_SECRET" \
+   '.authorization_configuration.client_id = $client_id | .authorization_configuration.client_secret = $secret' \
+   "$CONFIG_FILE" > "${CONFIG_FILE}.tmp"
 mv "${CONFIG_FILE}.tmp" "$CONFIG_FILE"
 
 echo "✅ Successfully updated $CONFIG_FILE with client secret"

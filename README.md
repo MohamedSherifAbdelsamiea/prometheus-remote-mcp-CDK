@@ -176,8 +176,11 @@ cdk deploy --app 'npx ts-node bin/lambda-app.ts' PrometheusLambdaMCPAPIGatewaySt
 # Make script executable
 chmod +x scripts/update-mcp-config.sh
 
-# Update config with real client secret (use same profile as deployment)
+# Update config with real client secret and ID (use same profile as deployment)
 ./scripts/update-mcp-config.sh your-profile-name
+
+# Or use default profile
+./scripts/update-mcp-config.sh
 
 # Verify config file
 cat mcp-server-config.json
@@ -288,17 +291,15 @@ cdk bootstrap
 # If update-mcp-config.sh fails, make sure to use the correct profile:
 ./scripts/update-mcp-config.sh your-profile-name
 
-# Or manually retrieve:
-USER_POOL_ID=$(aws cognito-idp list-user-pools --max-items 10 --profile your-profile --query "UserPools[?Name=='prometheus-mcp-oauth-pool'].Id" --output text)
-CLIENT_ID=$(jq -r '.authorization_configuration.client_id' mcp-server-config.json)
-aws cognito-idp describe-user-pool-client --user-pool-id "$USER_POOL_ID" --client-id "$CLIENT_ID" --profile your-profile --query 'UserPoolClient.ClientSecret' --output text
+# Or check CloudFormation outputs directly:
+aws cloudformation describe-stacks --stack-name PrometheusLambdaMCPCognitoStack --query "Stacks[0].Outputs"
 ```
 
-### Wrong User Pool Found
+### CDK Token Error in Config
 ```bash
-# If script finds wrong user pool, check your AWS profile:
-aws sts get-caller-identity --profile your-profile
-aws cognito-idp list-user-pools --max-results 10 --profile your-profile --region us-west-2
+# If you see ${Token[TOKEN.XX]} in config file, the script now fixes this automatically
+# by retrieving actual values from CloudFormation outputs instead of CDK tokens
+./scripts/update-mcp-config.sh your-profile-name
 ```
 
 ### Lambda Function Not Found
