@@ -106,6 +106,9 @@ cdk deploy --app 'npx ts-node bin/lambda-app.ts' --all --region us-west-2
 
 # 6. Test deployment
 curl $(jq -r '.endpoint' mcp-server-config.json | sed 's/mcp$/health/')
+
+# 7. Run comprehensive Python tests
+python3 test_lambda_mcp_endpoint.py
 ```
 
 ## 📋 **Prerequisites**
