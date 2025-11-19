@@ -1,12 +1,12 @@
 {
   "name": "Prometheus MCP Lambda Server",
-  "endpoint": "https://0ixu8aqtkc.execute-api.us-west-2.amazonaws.com/prod/mcp",
+  "endpoint": "https://${Token[TOKEN.86]}.execute-api.us-west-2.${Token[AWS.URLSuffix.2]}/${Token[TOKEN.94]}/mcp",
   "description": "Production-ready Prometheus MCP server deployed as AWS Lambda with API Gateway and Cognito JWT authentication. Provides 5 MCP tools for querying AWS Managed Prometheus: GetAvailableWorkspaces, ExecuteQuery, ExecuteRangeQuery, ListMetrics, and GetServerInfo. Supports natural language queries via Strands Agent integration with 748 available metrics from Kubernetes cluster monitoring.",
   "authorization_flow": "OAuth Client Credentials",
   "authorization_configuration": {
-    "client_id": "1krhi8ratf7605nt06aq7oo7hc",
-    "client_secret": "nobaos6quoaemlvu3qrvvnltnscgi1ihep61cnkarbcr9j5k54u",
-    "exchange_url": "https://prometheus-mcp-si618c.auth.us-west-2.amazoncognito.com/oauth2/token",
+    "client_id": "${Token[TOKEN.29]}",
+    "client_secret": "REPLACE_WITH_ACTUAL_SECRET",
+    "exchange_url": "https://${Token[TOKEN.33]}.auth.us-west-2.amazoncognito.com/oauth2/token",
     "exchange_parameters": [
       {
         "key": "grant_type",
@@ -41,13 +41,13 @@
     }
   ],
   "deployment_info": {
-    "git_tag": "v0.3.0-no-hardcoded-complete",
+    "git_tag": "v0.5.0-lambda-5tools-complete",
     "region": "us-west-2",
-    "lambda_function_name": "PrometheusLambdaMCPStack-MCPFunction073462F8-aiDlyhp6h6T7",
-    "lambda_function_arn": "arn:aws:lambda:us-west-2:542062284609:function:PrometheusLambdaMCPStack-MCPFunction073462F8-aiDlyhp6h6T7",
-    "user_pool_id": "us-west-2_ugryDczEK",
-    "cognito_domain": "prometheus-mcp-si618c",
-    "api_gateway_id": "0ixu8aqtkc",
-    "deployment_timestamp": "2025-11-19T15:05:46.000Z"
+    "lambda_function_name": "${Token[TOKEN.58]}",
+    "lambda_function_arn": "${Token[TOKEN.59]}",
+    "user_pool_id": "${Token[TOKEN.15]}",
+    "cognito_domain": "${Token[TOKEN.33]}",
+    "api_gateway_id": "${Token[TOKEN.86]}",
+    "deployment_timestamp": "2025-11-19T12:38:38.439Z"
   }
 }

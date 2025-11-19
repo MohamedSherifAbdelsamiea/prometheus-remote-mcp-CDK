@@ -1,18 +1,18 @@
 {
   "version": "48.0.0",
   "files": {
-    "d2a805aeed30ffc10050960ef322b2f169927e8d3c799329922035ac70847005": {
+    "e28ec110da67fd964970e0ead689c9741d508504b50b0d4fd04eb858da729aeb": {
       "displayName": "PrometheusLambdaMCPCognitoStack Template",
       "source": {
         "path": "PrometheusLambdaMCPCognitoStack.template.json",
         "packaging": "file"
       },
       "destinations": {
-        "542062284609-us-west-2-f4c36b49": {
-          "bucketName": "cdk-hnb659fds-assets-542062284609-us-west-2",
-          "objectKey": "d2a805aeed30ffc10050960ef322b2f169927e8d3c799329922035ac70847005.json",
+        "338293206254-us-west-2-69cbda76": {
+          "bucketName": "cdk-hnb659fds-assets-338293206254-us-west-2",
+          "objectKey": "e28ec110da67fd964970e0ead689c9741d508504b50b0d4fd04eb858da729aeb.json",
           "region": "us-west-2",
-          "assumeRoleArn": "arn:${AWS::Partition}:iam::542062284609:role/cdk-hnb659fds-file-publishing-role-542062284609-us-west-2"
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::338293206254:role/cdk-hnb659fds-file-publishing-role-338293206254-us-west-2"
         }
       }
     }

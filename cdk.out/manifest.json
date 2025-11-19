@@ -11,21 +11,21 @@
     },
     "PrometheusLambdaMCPCognitoStack": {
       "type": "aws:cloudformation:stack",
-      "environment": "aws://542062284609/us-west-2",
+      "environment": "aws://338293206254/us-west-2",
       "properties": {
         "templateFile": "PrometheusLambdaMCPCognitoStack.template.json",
         "terminationProtection": false,
         "validateOnSynth": false,
-        "assumeRoleArn": "arn:${AWS::Partition}:iam::542062284609:role/cdk-hnb659fds-deploy-role-542062284609-us-west-2",
-        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::542062284609:role/cdk-hnb659fds-cfn-exec-role-542062284609-us-west-2",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-542062284609-us-west-2/d2a805aeed30ffc10050960ef322b2f169927e8d3c799329922035ac70847005.json",
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::338293206254:role/cdk-hnb659fds-deploy-role-338293206254-us-west-2",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::338293206254:role/cdk-hnb659fds-cfn-exec-role-338293206254-us-west-2",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-338293206254-us-west-2/e28ec110da67fd964970e0ead689c9741d508504b50b0d4fd04eb858da729aeb.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
           "PrometheusLambdaMCPCognitoStack.assets"
         ],
         "lookupRole": {
-          "arn": "arn:${AWS::Partition}:iam::542062284609:role/cdk-hnb659fds-lookup-role-542062284609-us-west-2",
+          "arn": "arn:${AWS::Partition}:iam::338293206254:role/cdk-hnb659fds-lookup-role-338293206254-us-west-2",
           "requiresBootstrapStackVersion": 8,
           "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
         }
@@ -137,21 +137,21 @@
     },
     "PrometheusLambdaMCPStack": {
       "type": "aws:cloudformation:stack",
-      "environment": "aws://542062284609/us-west-2",
+      "environment": "aws://338293206254/us-west-2",
       "properties": {
         "templateFile": "PrometheusLambdaMCPStack.template.json",
         "terminationProtection": false,
         "validateOnSynth": false,
-        "assumeRoleArn": "arn:${AWS::Partition}:iam::542062284609:role/cdk-hnb659fds-deploy-role-542062284609-us-west-2",
-        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::542062284609:role/cdk-hnb659fds-cfn-exec-role-542062284609-us-west-2",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-542062284609-us-west-2/f0a65c8df7fdb8a3d4ba4b04e901c5991e368b1ad4485ead7c85f69522f57a3d.json",
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::338293206254:role/cdk-hnb659fds-deploy-role-338293206254-us-west-2",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::338293206254:role/cdk-hnb659fds-cfn-exec-role-338293206254-us-west-2",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-338293206254-us-west-2/5bca699d2301d2afa820d93ac4ae7cf37593e35a2dc86f2751dfb626fda58093.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
           "PrometheusLambdaMCPStack.assets"
         ],
         "lookupRole": {
-          "arn": "arn:${AWS::Partition}:iam::542062284609:role/cdk-hnb659fds-lookup-role-542062284609-us-west-2",
+          "arn": "arn:${AWS::Partition}:iam::338293206254:role/cdk-hnb659fds-lookup-role-338293206254-us-west-2",
           "requiresBootstrapStackVersion": 8,
           "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
         }
@@ -221,21 +221,21 @@
     },
     "PrometheusLambdaMCPAPIGatewayStack": {
       "type": "aws:cloudformation:stack",
-      "environment": "aws://542062284609/us-west-2",
+      "environment": "aws://338293206254/us-west-2",
       "properties": {
         "templateFile": "PrometheusLambdaMCPAPIGatewayStack.template.json",
         "terminationProtection": false,
         "validateOnSynth": false,
-        "assumeRoleArn": "arn:${AWS::Partition}:iam::542062284609:role/cdk-hnb659fds-deploy-role-542062284609-us-west-2",
-        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::542062284609:role/cdk-hnb659fds-cfn-exec-role-542062284609-us-west-2",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-542062284609-us-west-2/2f5e87605a62f614d2c0950b2ac4dea895758b36ce16367df74ee462ebf649ca.json",
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::338293206254:role/cdk-hnb659fds-deploy-role-338293206254-us-west-2",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::338293206254:role/cdk-hnb659fds-cfn-exec-role-338293206254-us-west-2",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-338293206254-us-west-2/170da985677ac77cf6f6ea39791abfd188ff3b5800efdd512f209fcca8036dd0.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
           "PrometheusLambdaMCPAPIGatewayStack.assets"
         ],
         "lookupRole": {
-          "arn": "arn:${AWS::Partition}:iam::542062284609:role/cdk-hnb659fds-lookup-role-542062284609-us-west-2",
+          "arn": "arn:${AWS::Partition}:iam::338293206254:role/cdk-hnb659fds-lookup-role-338293206254-us-west-2",
           "requiresBootstrapStackVersion": 8,
           "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
         }

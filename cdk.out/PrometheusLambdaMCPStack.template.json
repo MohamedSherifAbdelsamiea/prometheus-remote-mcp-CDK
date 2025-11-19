@@ -61,7 +61,7 @@
    "Type": "AWS::Lambda::Function",
    "Properties": {
     "Code": {
-     "S3Bucket": "cdk-hnb659fds-assets-542062284609-us-west-2",
+     "S3Bucket": "cdk-hnb659fds-assets-338293206254-us-west-2",
      "S3Key": "96bdccec51f124fda084df5fb68a71f1eac0dfa995d67af7cd6a7e79c9743ec6.zip"
     },
     "Description": "Prometheus MCP Server Lambda Function",

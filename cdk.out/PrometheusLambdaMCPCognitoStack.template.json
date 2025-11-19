@@ -109,7 +109,7 @@
   "PrometheusUserPoolMCPDomain667596D1": {
    "Type": "AWS::Cognito::UserPoolDomain",
    "Properties": {
-    "Domain": "prometheus-mcp-whukfj",
+    "Domain": "prometheus-mcp-lambda-33829320",
     "UserPoolId": {
      "Ref": "PrometheusUserPool8927C6A0"
     }
@@ -202,7 +202,7 @@
   },
   "TokenEndpoint": {
    "Description": "OAuth Token Endpoint (for M2M)",
-   "Value": "https://prometheus-mcp-whukfj.auth.us-west-2.amazoncognito.com/oauth2/token"
+   "Value": "https://prometheus-mcp-lambda-33829320.auth.us-west-2.amazoncognito.com/oauth2/token"
   },
   "ExportsOutputRefPrometheusUserPool8927C6A095B4E685": {
    "Value": {

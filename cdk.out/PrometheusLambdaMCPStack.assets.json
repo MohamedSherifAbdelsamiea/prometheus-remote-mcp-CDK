@@ -8,26 +8,26 @@
         "packaging": "zip"
       },
       "destinations": {
-        "542062284609-us-west-2-7a59af4a": {
-          "bucketName": "cdk-hnb659fds-assets-542062284609-us-west-2",
+        "338293206254-us-west-2-191a13a8": {
+          "bucketName": "cdk-hnb659fds-assets-338293206254-us-west-2",
           "objectKey": "96bdccec51f124fda084df5fb68a71f1eac0dfa995d67af7cd6a7e79c9743ec6.zip",
           "region": "us-west-2",
-          "assumeRoleArn": "arn:${AWS::Partition}:iam::542062284609:role/cdk-hnb659fds-file-publishing-role-542062284609-us-west-2"
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::338293206254:role/cdk-hnb659fds-file-publishing-role-338293206254-us-west-2"
         }
       }
     },
-    "f0a65c8df7fdb8a3d4ba4b04e901c5991e368b1ad4485ead7c85f69522f57a3d": {
+    "5bca699d2301d2afa820d93ac4ae7cf37593e35a2dc86f2751dfb626fda58093": {
       "displayName": "PrometheusLambdaMCPStack Template",
       "source": {
         "path": "PrometheusLambdaMCPStack.template.json",
         "packaging": "file"
       },
       "destinations": {
-        "542062284609-us-west-2-73093b7b": {
-          "bucketName": "cdk-hnb659fds-assets-542062284609-us-west-2",
-          "objectKey": "f0a65c8df7fdb8a3d4ba4b04e901c5991e368b1ad4485ead7c85f69522f57a3d.json",
+        "338293206254-us-west-2-f8324579": {
+          "bucketName": "cdk-hnb659fds-assets-338293206254-us-west-2",
+          "objectKey": "5bca699d2301d2afa820d93ac4ae7cf37593e35a2dc86f2751dfb626fda58093.json",
           "region": "us-west-2",
-          "assumeRoleArn": "arn:${AWS::Partition}:iam::542062284609:role/cdk-hnb659fds-file-publishing-role-542062284609-us-west-2"
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::338293206254:role/cdk-hnb659fds-file-publishing-role-338293206254-us-west-2"
         }
       }
     }

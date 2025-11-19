@@ -136,7 +136,13 @@ export CDK_DEFAULT_REGION=us-west-2  # Optional: override profile region
 aws sts get-caller-identity --profile your-profile-name
 ```
 
-**Why profiles matter**: Without specifying a profile, the deployment might conflict with existing Cognito User Pools or other resources in your default AWS account.
+**Why profiles matter**: Without specifying a profile, the deployment might conflict with existing Cognito User Pools or domains in your default AWS account. Cognito domains are globally unique across all AWS accounts.
+
+**Domain Conflicts**: If you get a Cognito domain error, set a custom domain prefix:
+```bash
+export COGNITO_DOMAIN_PREFIX=my-unique-prefix-$(date +%s)
+cdk deploy --app 'npx ts-node bin/lambda-app.ts' --all
+```
 
 ### 2. Setup Environment
 ```bash
