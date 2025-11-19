@@ -11,10 +11,11 @@ export class CognitoStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // Generate unique domain prefix using account ID and timestamp to avoid conflicts
+    // Generate unique domain prefix automatically to avoid conflicts across accounts
     const timestamp = Date.now().toString().slice(-6);
     const accountSuffix = this.account?.slice(-4) || 'xxxx';
-    const domainPrefix = process.env.COGNITO_DOMAIN_PREFIX || `prometheus-mcp-${accountSuffix}-${timestamp}`;
+    const randomSuffix = Math.random().toString(36).substring(2, 6);
+    const domainPrefix = process.env.COGNITO_DOMAIN_PREFIX || `prometheus-mcp-${accountSuffix}-${timestamp}-${randomSuffix}`;
 
     // Cognito User Pool
     this.userPool = new cognito.UserPool(this, 'PrometheusUserPool', {
