@@ -6,6 +6,8 @@
 set -e
 
 PROFILE=${1:-default}
+CONFIG_FILE="mcp-server-config.json"
+REGION="us-west-2"
 
 echo "🔍 Updating MCP configuration with actual client secret..."
 
