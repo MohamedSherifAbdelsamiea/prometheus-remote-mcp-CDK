@@ -659,7 +659,7 @@
   },
   "ConfigFile": {
    "Description": "MCP server configuration file location",
-   "Value": "/Users/mdsherif/Library/CloudStorage/WorkDocsDrive-Documents/MyMac/05Work/03 Ericsson/04 Bussiness Units/03 Cognitive Solution/04 Cloudsmith/01 Demo/05 lambda-mcp-cdk/mcp-server-config.json"
+   "Value": "mcp-server-config.json"
   },
   "ClientCredentialsNote": {
    "Description": "Command to retrieve client secret (replace REPLACE_WITH_ACTUAL_SECRET in config)",

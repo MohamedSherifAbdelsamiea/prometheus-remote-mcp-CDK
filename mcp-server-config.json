@@ -1,12 +1,12 @@
 {
   "name": "Prometheus MCP Lambda Server",
-  "endpoint": "https://${Token[TOKEN.86]}.execute-api.us-west-2.${Token[AWS.URLSuffix.2]}/${Token[TOKEN.94]}/mcp",
+  "endpoint": "https://vlt5jvj74g.execute-api.us-west-2.amazonaws.com/prod/mcp",
   "description": "Production-ready Prometheus MCP server deployed as AWS Lambda with API Gateway and Cognito JWT authentication. Provides 5 MCP tools for querying AWS Managed Prometheus: GetAvailableWorkspaces, ExecuteQuery, ExecuteRangeQuery, ListMetrics, and GetServerInfo. Supports natural language queries via Strands Agent integration with 748 available metrics from Kubernetes cluster monitoring.",
   "authorization_flow": "OAuth Client Credentials",
   "authorization_configuration": {
-    "client_id": "${Token[TOKEN.29]}",
-    "client_secret": "REPLACE_WITH_ACTUAL_SECRET",
-    "exchange_url": "https://${Token[TOKEN.33]}.auth.us-west-2.amazoncognito.com/oauth2/token",
+    "client_id": "12f62v5lh954a2r94s1tgiflfp",
+    "client_secret": "1bkbu2d65dfa5cfgi8usour8nue36mu66p8h1j5icvt2e06vvnrb",
+    "exchange_url": "https://mcp-uswest2-93206254-1763627341066-60id2i3i-2ii.auth.us-west-2.amazoncognito.com/oauth2/token",
     "exchange_parameters": [
       {
         "key": "grant_type",
@@ -43,11 +43,11 @@
   "deployment_info": {
     "git_tag": "v0.5.0-lambda-5tools-complete",
     "region": "us-west-2",
-    "lambda_function_name": "${Token[TOKEN.58]}",
-    "lambda_function_arn": "${Token[TOKEN.59]}",
-    "user_pool_id": "${Token[TOKEN.15]}",
-    "cognito_domain": "${Token[TOKEN.33]}",
-    "api_gateway_id": "${Token[TOKEN.86]}",
-    "deployment_timestamp": "2025-11-19T12:38:38.439Z"
+    "lambda_function_name": "${Token[TOKEN.59]}",
+    "lambda_function_arn": "${Token[TOKEN.60]}",
+    "user_pool_id": "${Token[TOKEN.16]}",
+    "cognito_domain": "${Token[TOKEN.34]}",
+    "api_gateway_id": "${Token[TOKEN.87]}",
+    "deployment_timestamp": "2025-11-20T08:29:02.193Z"
   }
 }

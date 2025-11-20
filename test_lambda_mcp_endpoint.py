@@ -9,12 +9,22 @@ from strands.tools.mcp.mcp_client import MCPClient
 from mcp.client.streamable_http import streamablehttp_client
 import requests
 import json
+import os
 
-def get_token():
+def load_config():
+    """Load configuration from mcp-server-config.json"""
+    config_path = os.path.join(os.path.dirname(__file__), 'mcp-server-config.json')
+    with open(config_path, 'r') as f:
+        return json.load(f)
+
+def get_token(config):
+    auth_config = config['authorization_configuration']
+    scope = ' '.join([param['value'] for param in auth_config['exchange_parameters'] if param['key'] == 'scope'])
+    
     response = requests.post(
-        "https://prometheus-mcp-si618c.auth.us-west-2.amazoncognito.com/oauth2/token",
-        data={'grant_type': 'client_credentials', 'scope': 'prometheus-mcp-server/read prometheus-mcp-server/write'},
-        auth=("1krhi8ratf7605nt06aq7oo7hc", "nobaos6quoaemlvu3qrvvnltnscgi1ihep61cnkarbcr9j5k54u"),
+        auth_config['exchange_url'],
+        data={'grant_type': 'client_credentials', 'scope': scope},
+        auth=(auth_config['client_id'], auth_config['client_secret']),
         headers={'Content-Type': 'application/x-www-form-urlencoded'}
     )
     return response.json()['access_token']
@@ -22,10 +32,10 @@ def get_token():
 def create_transport(mcp_url, token):
     return streamablehttp_client(mcp_url, headers={"Authorization": f"Bearer {token}"})
 
-def test_direct_http():
+def test_direct_http(config):
     """Test direct HTTP call to Lambda MCP endpoint"""
-    token = get_token()
-    url = "https://0ixu8aqtkc.execute-api.us-west-2.amazonaws.com/prod/mcp"
+    token = get_token(config)
+    url = config['endpoint']
     
     payload = {
         "jsonrpc": "2.0",
@@ -47,18 +57,19 @@ def test_direct_http():
     return response.status_code == 200
 
 def run_agent():
-    token = get_token()
+    config = load_config()
+    token = get_token(config)
     print("✅ Authenticated")
     
     # Test direct HTTP first
-    if not test_direct_http():
+    if not test_direct_http(config):
         print("❌ Direct HTTP test failed")
         return
     
     print("✅ Direct HTTP test passed")
     
-    # Use the new Lambda MCP endpoint
-    mcp_url = "https://0ixu8aqtkc.execute-api.us-west-2.amazonaws.com/prod/mcp"
+    # Use the MCP endpoint from config
+    mcp_url = config['endpoint']
     
     model = BedrockModel(inference_profile_id="us.anthropic.claude-3-5-sonnet-20241022-v2:0", streaming=True)
     mcp_client = MCPClient(lambda: create_transport(mcp_url, token))
