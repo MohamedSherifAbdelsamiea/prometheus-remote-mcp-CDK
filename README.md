@@ -376,3 +376,15 @@ rm -rf cdk.out node_modules
 3. **Scale**: Lambda auto-scales, no configuration needed
 4. **Integrate**: Use with Strands Agent, Cursor, Cline, etc.
 
+## 📄 **License**
+
+This project is licensed under the MIT-0 License. See the [LICENSE](LICENSE) file for details.
+
+## 🤝 **Contributing**
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute to this project.
+
+## 🔒 **Security**
+
+See [SECURITY.md](SECURITY.md) for security best practices and reporting security issues.
+
