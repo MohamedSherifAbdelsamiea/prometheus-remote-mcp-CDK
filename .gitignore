@@ -1,0 +1,11 @@
+*.js
+!jest.config.js
+*.d.ts
+node_modules
+cdk.out
+.cdk.staging
+cdk.context.json
+mcp-server-config.json
+.env
+*.swp
+.DS_Store
