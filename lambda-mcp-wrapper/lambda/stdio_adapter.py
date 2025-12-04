@@ -149,9 +149,46 @@ class StdioAdapter:
             )
             
             # Format the result according to MCP protocol
+            # FastMCP returns (content, metadata) tuple
+            if isinstance(result, tuple) and len(result) == 2:
+                content_list, metadata = result
+                # Convert content items to dicts
+                content = []
+                for item in content_list:
+                    if hasattr(item, 'model_dump'):
+                        content.append(item.model_dump())
+                    elif hasattr(item, 'type') and hasattr(item, 'text'):
+                        content.append({'type': item.type, 'text': item.text})
+                    else:
+                        content.append(item)
+                return {
+                    'jsonrpc': '2.0',
+                    'id': request_id,
+                    'result': {'content': content}
+                }
+            
             # If result is a Pydantic model, convert to dict
             if hasattr(result, 'model_dump'):
                 result = result.model_dump()
+            
+            # If result is already a list of content items, use it directly
+            if isinstance(result, list) and len(result) > 0:
+                first_item = result[0]
+                if hasattr(first_item, 'type') and hasattr(first_item, 'text'):
+                    # Already in MCP content format, extract text
+                    content = []
+                    for item in result:
+                        if hasattr(item, 'model_dump'):
+                            content.append(item.model_dump())
+                        elif hasattr(item, 'type') and hasattr(item, 'text'):
+                            content.append({'type': item.type, 'text': item.text})
+                        else:
+                            content.append(item)
+                    return {
+                        'jsonrpc': '2.0',
+                        'id': request_id,
+                        'result': {'content': content}
+                    }
             
             # Wrap result in MCP content format
             return {
