@@ -118,7 +118,7 @@ def handle_mcp_request(event, context):
                 'tools': [
                 {
                     'name': 'GetAvailableWorkspaces',
-                    'description': 'List available Prometheus workspaces',
+                    'description': '[READ-ONLY] List available Prometheus workspaces in the specified AWS region. This tool only reads workspace metadata and does not modify any data.',
                     'inputSchema': {
                         'type': 'object',
                         'properties': {
@@ -128,7 +128,7 @@ def handle_mcp_request(event, context):
                 },
                 {
                     'name': 'ExecuteQuery',
-                    'description': 'Execute a PromQL query against Amazon Managed Prometheus at a specific instant in time. Returns current metric values. For time series data over a range, use ExecuteRangeQuery instead.',
+                    'description': '[READ-ONLY] Execute a PromQL query against Amazon Managed Prometheus at a specific instant in time. Returns current metric values without modifying any data. For time series data over a range, use ExecuteRangeQuery instead.',
                     'inputSchema': {
                         'type': 'object',
                         'properties': {
@@ -142,7 +142,7 @@ def handle_mcp_request(event, context):
                 },
                 {
                     'name': 'ExecuteRangeQuery',
-                    'description': 'Execute a PromQL range query over a time period. Returns time series data useful for generating graphs or trend analysis.',
+                    'description': '[READ-ONLY] Execute a PromQL range query over a time period. Returns time series data useful for generating graphs or trend analysis. This tool only reads metrics and does not modify any data.',
                     'inputSchema': {
                         'type': 'object',
                         'properties': {
@@ -158,7 +158,7 @@ def handle_mcp_request(event, context):
                 },
                 {
                     'name': 'ListMetrics',
-                    'description': 'Get a sorted list of all available metric names in the Prometheus server. Useful for discovering metrics before crafting specific queries.',
+                    'description': '[READ-ONLY] Get a sorted list of all available metric names in the Prometheus server. Useful for discovering metrics before crafting specific queries. This tool only reads metric names and does not modify any data.',
                     'inputSchema': {
                         'type': 'object',
                         'properties': {
@@ -170,7 +170,7 @@ def handle_mcp_request(event, context):
                 },
                 {
                     'name': 'GetServerInfo',
-                    'description': 'Get information about the Prometheus server configuration including URL, AWS region, profile, and service name. Useful for debugging connection issues.',
+                    'description': '[READ-ONLY] Get information about the Prometheus server configuration including URL, AWS region, profile, and service name. Useful for debugging connection issues. This tool only reads server metadata and does not modify any configuration.',
                     'inputSchema': {
                         'type': 'object',
                         'properties': {

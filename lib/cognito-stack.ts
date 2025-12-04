@@ -108,6 +108,12 @@ export class CognitoStack extends cdk.Stack {
           }),
         ],
       },
+      // Token expiration settings
+      accessTokenValidity: cdk.Duration.hours(1),  // Access token expires in 1 hour
+      idTokenValidity: cdk.Duration.hours(1),      // ID token expires in 1 hour
+      refreshTokenValidity: cdk.Duration.days(30), // Refresh token expires in 30 days
+      // Prevent token reuse
+      enableTokenRevocation: true,
     });
 
     // Cognito Domain
