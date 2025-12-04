@@ -18,3 +18,4 @@ __pycache__/
 
 # macOS
 .DS_Store
+lambda-mcp-wrapper/lambda/botocore/data/*/examples-*.json
