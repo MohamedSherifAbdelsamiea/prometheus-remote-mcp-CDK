@@ -34,15 +34,20 @@ Production-ready Prometheus MCP (Model Context Protocol) server deployed as AWS 
                         │                       │  • GetServerInfo            │  │
                         │                       └─────────────────────────────┘  │
                         │                                       │                 │
-                        │                       ┌─────────────────────────────┐  │
-                        │                       │    Amazon Managed           │  │
-                        │                       │    Prometheus (AMP)         │  │
-                        │                       │                             │  │
-                        │                       │  • Metrics Storage          │  │
-                        │                       │  • PromQL Query Engine      │  │
-                        │                       │  • 748+ Available Metrics   │  │
-                        │                       └─────────────────────────────┘  │
-                        └─────────────────────────────────────────────────────────┘
+                        │                                       │                 │
+                        └───────────────────────────────────────┼─────────────────┘
+                                                                │
+                                                ┌───────────────▼─────────────────┐
+                                                │    Amazon Managed               │
+                                                │    Prometheus (AMP)             │
+                                                │  ⚠️  NOT PART OF CDK            │
+                                                │  👤 USER MUST CONFIGURE         │
+                                                │                                 │
+                                                │  • Metrics Storage              │
+                                                │  • PromQL Query Engine          │
+                                                │  • 748+ Available Metrics       │
+                                                │  • Workspace ARN Required       │
+                                                └─────────────────────────────────┘
 
 Flow:
 1. MCP Client requests OAuth token from Cognito
@@ -110,7 +115,7 @@ cdk deploy --app 'npx ts-node bin/lambda-app.ts' --all --region us-west-2
 curl $(jq -r '.endpoint' mcp-server-config.json | sed 's/mcp$/health/')
 
 # 7. Test MCP endpoint (optional - requires authentication)
-# See test_lambda_mcp_endpoint.py for comprehensive testing
+python3 test_lambda_mcp_endpoint.py
 ```
 
 **Note**: The Lambda function now uses `lambda_function_v2.handler` with the official MCP SDK.
@@ -207,7 +212,7 @@ TOKEN_URL=$(jq -r '.authorization_configuration.exchange_url' mcp-server-config.
 # Get token
 TOKEN=$(curl -s -X POST "$TOKEN_URL" \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "grant_type=client_credentials&scope=prometheus-mcp-server/read prometheus-mcp-server/write" \
+  -d "grant_type=client_credentials&scope=prometheus-mcp-server/read" \
   -u "$CLIENT_ID:$CLIENT_SECRET" | jq -r '.access_token')
 
 # Test MCP tools/list
@@ -252,7 +257,7 @@ The CDK deployment supports the following environment variables for customizatio
 | `RESOURCE_SERVER_ID` | OAuth resource server identifier | `prometheus-mcp-server` |
 | `CALLBACK_URL` | OAuth callback URL | `https://localhost:3000/oauth2/idpresponse` |
 | `LOGOUT_URL` | OAuth logout URL | `https://localhost:3000/` |
-| `OAUTH_SCOPE` | OAuth scopes | `prometheus-mcp-server/read prometheus-mcp-server/write` |
+| `OAUTH_SCOPE` | OAuth scopes | `prometheus-mcp-server/read` |
 
 ```bash
 # Example with custom values - ALWAYS use --region flag

@@ -1,664 +1,753 @@
-# Lambda MCP Server - Complete Call Flow Documentation
+# MCP Client to Server Call Flow
 
-## Overview
+This document describes the complete request/response flow from an MCP client to the Prometheus MCP Lambda server.
 
-This document details the complete request flow from MCP client to Lambda MCP server, including OAuth 2.0 authentication, JWT validation, and MCP protocol handling.
-
-## Architecture Components
+## Architecture Overview
 
 ```
-┌─────────────┐     ┌──────────────┐     ┌─────────────────┐     ┌──────────────┐     ┌─────────────┐
-│ MCP Client  │────▶│   Cognito    │     │  API Gateway    │────▶│ JWT Authorizer│────▶│ MCP Lambda  │
-│  (Python)   │     │  User Pool   │     │ (REST API)      │     │   Lambda      │     │  Function   │
-└─────────────┘     └──────────────┘     └─────────────────┘     └──────────────┘     └─────────────┘
-                           │                      │                       │                     │
-                           │                      │                       │                     │
-                           ▼                      ▼                       ▼                     ▼
-                    OAuth Token              HTTP Endpoint         Signature              MCP Protocol
-                    Generation               /prod/mcp             Verification           Handler
+MCP Client → OAuth Token → API Gateway → JWT Authorizer → Lambda → FastMCP → AWS Prometheus
 ```
 
-## Phase 1: OAuth Authentication
+## Visual Flow Diagram
 
-### Step 1: Client Reads Configuration
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                          MCP CLIENT TO SERVER FLOW                              │
+└─────────────────────────────────────────────────────────────────────────────────┘
 
-**File**: `mcp-server-config.json`
+┌──────────────────┐
+│   MCP Client     │  1. Read mcp-server-config.json
+│ (Strands/Cursor) │     - endpoint URL
+└────────┬─────────┘     - OAuth credentials
+         │
+         │ 2. OAuth Token Request
+         │    POST /oauth2/token
+         │    grant_type=client_credentials
+         ▼
+┌──────────────────┐
+│  AWS Cognito     │  3. Validate credentials
+│   User Pool      │     - Check client_id/secret
+└────────┬─────────┘     - Generate JWT token
+         │
+         │ 4. Return JWT
+         │    {"access_token": "eyJ..."}
+         ▼
+┌──────────────────┐
+│   MCP Client     │  5. MCP Request
+│                  │     POST /prod/mcp
+└────────┬─────────┘     Authorization: Bearer eyJ...
+         │                Body: JSON-RPC request
+         │
+         │ 6. HTTP POST
+         ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           AWS API GATEWAY                                    │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  7. Extract JWT from Authorization header                             │ │
+│  │  8. Invoke JWT Authorizer Lambda                                       │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+└────────┬─────────────────────────────────────────────────────────────────────┘
+         │
+         │ 9. Validate Token
+         ▼
+┌──────────────────┐
+│ JWT Authorizer   │  10. Download Cognito JWKS
+│     Lambda       │  11. Verify JWT signature
+└────────┬─────────┘  12. Check expiration & scope
+         │            13. Return IAM policy
+         │
+         │ 14. IAM Policy (Allow/Deny)
+         ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           AWS API GATEWAY                                    │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  15. If authorized, invoke MCP Lambda                                  │ │
+│  │  16. Pass event with body, headers, context                            │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+└────────┬─────────────────────────────────────────────────────────────────────┘
+         │
+         │ 17. Lambda Event
+         ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                      MCP LAMBDA FUNCTION                                     │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  lambda_function_v2.handler()                                          │ │
+│  │  18. Parse event['body'] → JSON-RPC request                            │ │
+│  │  19. Create StdioAdapter(prometheus_mcp_server)                        │ │
+│  │  20. Call adapter.handle_jsonrpc_request(request)                      │ │
+│  └────────┬───────────────────────────────────────────────────────────────┘ │
+│           │                                                                  │
+│           │ 21. Route by method                                              │
+│           ▼                                                                  │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  stdio_adapter.py                                                      │ │
+│  │  ┌──────────────┬──────────────┬──────────────┐                       │ │
+│  │  │ initialize   │ tools/list   │ tools/call   │                       │ │
+│  │  └──────────────┴──────────────┴──────┬───────┘                       │ │
+│  │                                        │                                │ │
+│  │  22. Extract tool_name & arguments     │                                │ │
+│  │  23. Call mcp_server._tool_manager.call_tool()                         │ │
+│  └────────┬───────────────────────────────────────────────────────────────┘ │
+│           │                                                                  │
+│           │ 24. Validate & execute                                           │
+│           ▼                                                                  │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  FastMCP ToolManager                                                   │ │
+│  │  25. Find tool by name                                                 │ │
+│  │  26. Validate arguments against schema                                 │ │
+│  │  27. Inject Context object                                             │ │
+│  │  28. Call tool function: list_metrics(ctx, workspace_id, ...)         │ │
+│  └────────┬───────────────────────────────────────────────────────────────┘ │
+│           │                                                                  │
+│           │ 29. Execute tool                                                 │
+│           ▼                                                                  │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  prometheus_mcp_server/server.py                                       │ │
+│  │  @mcp.tool(name='ListMetrics')                                         │ │
+│  │  async def list_metrics(...):                                          │ │
+│  │    30. configure_workspace_for_request()                               │ │
+│  │    31. Get workspace URL from DescribeWorkspace API                    │ │
+│  │    32. PrometheusClient.make_request()                                 │ │
+│  └────────┬───────────────────────────────────────────────────────────────┘ │
+└───────────┼──────────────────────────────────────────────────────────────────┘
+            │
+            │ 33. AWS API Call (SigV4 signed)
+            ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    AMAZON MANAGED PROMETHEUS                                 │
+│  34. GET /workspaces/ws-xxx/api/v1/label/__name__/values                    │
+│  35. Query metrics database                                                  │
+│  36. Return: {"status":"success","data":["metric1","metric2",...]}          │
+└────────┬─────────────────────────────────────────────────────────────────────┘
+         │
+         │ 37. Response data
+         ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                      RESPONSE FLOW (REVERSE)                                 │
+│                                                                              │
+│  38. list_metrics() → MetricsList(metrics=[...])                            │
+│         ↓                                                                    │
+│  39. ToolManager → (content_list, metadata) tuple                           │
+│         ↓                                                                    │
+│  40. stdio_adapter → JSON-RPC format:                                       │
+│      {"jsonrpc":"2.0","id":1,"result":{"content":[...]}}                    │
+│         ↓                                                                    │
+│  41. lambda_function_v2 → HTTP response:                                    │
+│      {"statusCode":200,"body":"..."}                                        │
+│         ↓                                                                    │
+│  42. API Gateway → Forward to client                                        │
+│         ↓                                                                    │
+│  43. MCP Client → Parse and display                                         │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Detailed Call Flow
+
+### Component Interaction Diagram
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│             │     │             │     │             │     │             │
+│ MCP Client  │────▶│  Cognito    │     │ API Gateway │     │ JWT Auth    │
+│             │     │  User Pool  │     │             │     │  Lambda     │
+│             │◀────│             │     │             │     │             │
+└─────────────┘     └─────────────┘     └──────┬──────┘     └──────┬──────┘
+      │                                        │                    │
+      │                                        │                    │
+      │ ③ POST /mcp                            │ ④ Validate JWT     │
+      │    + JWT Token                         │                    │
+      └────────────────────────────────────────▶                    │
+                                               │                    │
+                                               └───────────────────▶│
+                                                                    │
+                                               ◀────────────────────┘
+                                               │ ⑤ IAM Policy
+                                               │
+                                               ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          MCP LAMBDA FUNCTION                                │
+│                                                                             │
+│  ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐      │
+│  │ lambda_function  │──▶│ stdio_adapter    │──▶│ FastMCP          │      │
+│  │     _v2.py       │   │      .py         │   │ ToolManager      │      │
+│  └──────────────────┘   └──────────────────┘   └────────┬─────────┘      │
+│                                                           │                 │
+│                                                           ▼                 │
+│                                              ┌──────────────────┐          │
+│                                              │ prometheus_mcp   │          │
+│                                              │   _server        │          │
+│                                              │   /server.py     │          │
+│                                              └────────┬─────────┘          │
+└─────────────────────────────────────────────────────┼─────────────────────┘
+                                                      │
+                                                      │ ⑥ AWS API Call
+                                                      │    (SigV4)
+                                                      ▼
+                                          ┌──────────────────────┐
+                                          │  Amazon Managed      │
+                                          │  Prometheus (AMP)    │
+                                          │                      │
+                                          │  • Query Engine      │
+                                          │  • Metrics Storage   │
+                                          └──────────────────────┘
+```
+
+### Sequence Diagram
+
+```
+Client    Cognito    API-GW    JWT-Auth    Lambda    FastMCP    Prometheus
+  │          │          │          │          │         │           │
+  │──①──────▶│          │          │          │         │           │
+  │  Token   │          │          │          │         │           │
+  │  Request │          │          │          │         │           │
+  │          │          │          │          │         │           │
+  │◀─②───────│          │          │          │         │           │
+  │  JWT     │          │          │          │         │           │
+  │          │          │          │          │         │           │
+  │──③──────────────────▶│          │          │         │           │
+  │  POST /mcp          │          │          │         │           │
+  │  + JWT              │          │          │         │           │
+  │          │          │          │          │         │           │
+  │          │          │──④──────▶│          │         │           │
+  │          │          │ Validate │          │         │           │
+  │          │          │          │          │         │           │
+  │          │          │◀─⑤───────│          │         │           │
+  │          │          │ Allow    │          │         │           │
+  │          │          │          │          │         │           │
+  │          │          │──⑥──────────────────▶│         │           │
+  │          │          │  Invoke              │         │           │
+  │          │          │                      │         │           │
+  │          │          │                      │──⑦─────▶│           │
+  │          │          │                      │ Route   │           │
+  │          │          │                      │         │           │
+  │          │          │                      │         │──⑧───────▶│
+  │          │          │                      │         │  Query    │
+  │          │          │                      │         │           │
+  │          │          │                      │         │◀─⑨───────│
+  │          │          │                      │         │  Data     │
+  │          │          │                      │         │           │
+  │          │          │                      │◀─⑩─────│           │
+  │          │          │                      │ Result  │           │
+  │          │          │                      │         │           │
+  │          │          │◀─⑪──────────────────│         │           │
+  │          │          │  Response            │         │           │
+  │          │          │                      │         │           │
+  │◀─⑫──────────────────│                      │         │           │
+  │  JSON-RPC          │                      │         │           │
+  │  Response          │                      │         │           │
+  │          │          │                      │         │           │
+```
+
+### Data Flow Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         REQUEST TRANSFORMATION                          │
+└─────────────────────────────────────────────────────────────────────────┘
+
+① MCP Client Request
+   ┌────────────────────────────────────────────────────────────┐
+   │ {                                                          │
+   │   "jsonrpc": "2.0",                                        │
+   │   "id": 1,                                                 │
+   │   "method": "tools/call",                                  │
+   │   "params": {                                              │
+   │     "name": "ListMetrics",                                 │
+   │     "arguments": {"workspace_id": "ws-xxx"}                │
+   │   }                                                        │
+   │ }                                                          │
+   └────────────────────────────────────────────────────────────┘
+                              ↓
+② API Gateway Event
+   ┌────────────────────────────────────────────────────────────┐
+   │ {                                                          │
+   │   "httpMethod": "POST",                                    │
+   │   "path": "/mcp",                                          │
+   │   "headers": {"Authorization": "Bearer eyJ..."},           │
+   │   "body": "{\"jsonrpc\":\"2.0\",\"id\":1,...}"            │
+   │ }                                                          │
+   └────────────────────────────────────────────────────────────┘
+                              ↓
+③ Lambda Handler Parsing
+   ┌────────────────────────────────────────────────────────────┐
+   │ request = json.loads(event['body'])                        │
+   │ method = "tools/call"                                      │
+   │ params = {"name": "ListMetrics", "arguments": {...}}       │
+   └────────────────────────────────────────────────────────────┘
+                              ↓
+④ STDIO Adapter Routing
+   ┌────────────────────────────────────────────────────────────┐
+   │ tool_name = "ListMetrics"                                  │
+   │ arguments = {"workspace_id": "ws-xxx"}                     │
+   └────────────────────────────────────────────────────────────┘
+                              ↓
+⑤ FastMCP Tool Call
+   ┌────────────────────────────────────────────────────────────┐
+   │ list_metrics(                                              │
+   │   ctx=Context(),                                           │
+   │   workspace_id="ws-xxx",                                   │
+   │   region=None,                                             │
+   │   profile=None                                             │
+   │ )                                                          │
+   └────────────────────────────────────────────────────────────┘
+                              ↓
+⑥ AWS API Request
+   ┌────────────────────────────────────────────────────────────┐
+   │ GET https://aps-workspaces.us-east-1.amazonaws.com/       │
+   │     workspaces/ws-xxx/api/v1/label/__name__/values         │
+   │ Authorization: AWS4-HMAC-SHA256 ...                        │
+   └────────────────────────────────────────────────────────────┘
+                              ↓
+⑦ Prometheus Response
+   ┌────────────────────────────────────────────────────────────┐
+   │ {                                                          │
+   │   "status": "success",                                     │
+   │   "data": ["metric1", "metric2", "metric3"]                │
+   │ }                                                          │
+   └────────────────────────────────────────────────────────────┘
+                              ↓
+⑧ Tool Return Value
+   ┌────────────────────────────────────────────────────────────┐
+   │ MetricsList(                                               │
+   │   metrics=["metric1", "metric2", "metric3"]                │
+   │ )                                                          │
+   └────────────────────────────────────────────────────────────┘
+                              ↓
+⑨ FastMCP Conversion
+   ┌────────────────────────────────────────────────────────────┐
+   │ (                                                          │
+   │   [TextContent(type="text", text='{"metrics":[...]}')],    │
+   │   {}                                                       │
+   │ )                                                          │
+   └────────────────────────────────────────────────────────────┘
+                              ↓
+⑩ STDIO Adapter Formatting
+   ┌────────────────────────────────────────────────────────────┐
+   │ {                                                          │
+   │   "jsonrpc": "2.0",                                        │
+   │   "id": 1,                                                 │
+   │   "result": {                                              │
+   │     "content": [{                                          │
+   │       "type": "text",                                      │
+   │       "text": "{\"metrics\":[\"metric1\",...]}"            │
+   │     }]                                                     │
+   │   }                                                        │
+   │ }                                                          │
+   └────────────────────────────────────────────────────────────┘
+                              ↓
+⑪ Lambda HTTP Response
+   ┌────────────────────────────────────────────────────────────┐
+   │ {                                                          │
+   │   "statusCode": 200,                                       │
+   │   "headers": {"Content-Type": "application/json"},         │
+   │   "body": "{\"jsonrpc\":\"2.0\",\"id\":1,...}"            │
+   │ }                                                          │
+   └────────────────────────────────────────────────────────────┘
+                              ↓
+⑫ Client Receives Response
+   ┌────────────────────────────────────────────────────────────┐
+   │ Parsed metrics: ["metric1", "metric2", "metric3"]         │
+   └────────────────────────────────────────────────────────────┘
+```
+
+## Detailed Call Flow
+
+### 1. MCP Client Initialization
+
+**Component**: MCP Client (Strands/Cursor/Cline)
+
+The client reads the server configuration from `mcp-server-config.json`:
 
 ```json
 {
+  "endpoint": "https://00rm0srvfe.execute-api.us-east-1.amazonaws.com/prod/mcp",
   "authorization_configuration": {
-    "client_id": "3hifr4ho59ivsvrvqnt1bt3efu",
-    "client_secret": "jpnq9jsr...",
-    "exchange_url": "https://mcp-uswest2-....auth.us-west-2.amazoncognito.com/oauth2/token"
+    "client_id": "706imdutkllcssievt4964v3a3",
+    "client_secret": "u54lk18v...",
+    "exchange_url": "https://mcp-useast1-93206254-1764859683348-i1fpytxq-1phg.auth.us-east-1.amazoncognito.com/oauth2/token"
   }
 }
 ```
 
-### Step 2: Token Request
+### 2. OAuth Token Request
+
+**Component**: AWS Cognito User Pool
 
 **Request**:
 ```http
-POST /oauth2/token HTTP/1.1
-Host: mcp-uswest2-93206254-1764351429299-voq6g9xy-1of9.auth.us-west-2.amazoncognito.com
+POST https://cognito-domain.auth.us-east-1.amazoncognito.com/oauth2/token
 Content-Type: application/x-www-form-urlencoded
-Authorization: Basic M2hpZnI0aG81OWl2c3ZydnFudDFidDNlZnU6anBucTlqc3I...
+Authorization: Basic <base64(client_id:client_secret)>
 
-grant_type=client_credentials&scope=prometheus-mcp-server/read prometheus-mcp-server/write
+grant_type=client_credentials&scope=prometheus-mcp-server/read
 ```
-
-**Cognito Processing**:
-1. Validates `client_id` and `client_secret`
-2. Checks requested scopes are allowed for this client
-3. Generates JWT token:
-   - Signs with Cognito private key (RS256)
-   - Sets expiration to 1 hour
-   - Includes claims: `client_id`, `scope`, `iss`, `exp`, `token_use`
 
 **Response**:
 ```json
 {
-  "access_token": "eyJraWQiOiJSQnl2QXBuc1hlVnpHTDVWODJBK0pKMTJNbG9qMGVSdEZNSDJtdGdob0prPSIsImFsZyI6IlJTMjU2In0...",
-  "token_type": "Bearer",
-  "expires_in": 3600
+  "access_token": "eyJraWQiOiJ...",
+  "expires_in": 3600,
+  "token_type": "Bearer"
 }
 ```
 
-**JWT Token Structure**:
-```json
-{
-  "header": {
-    "kid": "RByvApnsXeVzGL5V82A+JJ12Mloj0eRtFMH2mtghoJk=",
-    "alg": "RS256"
-  },
-  "payload": {
-    "sub": "3hifr4ho59ivsvrvqnt1bt3efu",
-    "token_use": "access",
-    "scope": "prometheus-mcp-server/read prometheus-mcp-server/write",
-    "auth_time": 1764829903,
-    "iss": "https://cognito-idp.us-west-2.amazonaws.com/us-west-2_BXDXcVh5V",
-    "exp": 1764833503,
-    "iat": 1764829903,
-    "client_id": "3hifr4ho59ivsvrvqnt1bt3efu"
-  },
-  "signature": "f-kWgrQMSJkOeaRDoaN9SiiKAOTPjsOSPscz9CdwfVm7..."
-}
-```
+### 3. MCP Request
 
-## Phase 2: MCP Request
-
-### Step 3: Client Makes MCP Request
+**Component**: MCP Client
 
 **Request**:
 ```http
-POST /prod/mcp HTTP/1.1
-Host: xlakxojll5.execute-api.us-west-2.amazonaws.com
-Authorization: Bearer eyJraWQiOiJSQnl2QXBuc1hlVnpHTDVWODJBK0pKMTJNbG9qMGVSdEZNSDJtdGdob0prPSIsImFsZyI6IlJTMjU2In0...
+POST https://00rm0srvfe.execute-api.us-east-1.amazonaws.com/prod/mcp
+Authorization: Bearer eyJraWQiOiJ...
 Content-Type: application/json
 
 {
   "jsonrpc": "2.0",
-  "method": "tools/list",
-  "id": 1
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "ListMetrics",
+    "arguments": {
+      "workspace_id": "ws-cbfcf915-b52c-4bc0-9499-8f24e1b4a81d"
+    }
+  }
 }
 ```
 
-### Step 4: API Gateway Processing
+### 4. API Gateway Processing
 
-**API Gateway Actions**:
-1. Receives POST request to `/prod/mcp`
-2. Extracts `Authorization` header
-3. Checks route configuration:
-   - Method: POST
-   - Path: /mcp
-   - Authorizer: MCPJWTAuthorizer (Lambda)
-4. Invokes JWT Authorizer Lambda
+**Component**: Amazon API Gateway
 
-**Authorizer Invocation Event**:
+- Receives HTTP POST request
+- Extracts JWT token from `Authorization` header
+- Routes to JWT Authorizer Lambda for validation
+
+### 5. JWT Authorization
+
+**Component**: JWT Authorizer Lambda  
+**Function**: `PrometheusLambdaMCPAPIGatewa-JWTAuthorizerE8D8D90E-Bq2yvKofVWmC`
+
+**Process**:
+1. Extracts JWT token from request
+2. Downloads Cognito JWKS (JSON Web Key Set)
+3. Validates JWT signature
+4. Checks token expiration
+5. Verifies required scope: `prometheus-mcp-server/read`
+6. Returns IAM policy (Allow/Deny)
+
+**IAM Policy Response**:
 ```json
 {
-  "type": "TOKEN",
-  "authorizationToken": "Bearer eyJraWQiOiJSQnl2...",
-  "methodArn": "arn:aws:execute-api:us-west-2:338293206254:xlakxojll5/prod/POST/mcp"
-}
-```
-
-## Phase 3: JWT Authorization
-
-### Step 5: JWT Authorizer Lambda Processing
-
-**File**: `lambda/jwt-authorizer.py`
-
-#### 5.1: Extract Token
-```python
-token = event['authorizationToken'].replace('Bearer ', '')
-```
-
-#### 5.2: Get Token Header (Unverified)
-```python
-header = jwt.get_unverified_header(token)
-# Returns: {"kid": "RByvApnsXeVzGL5V82A+JJ...", "alg": "RS256"}
-```
-
-#### 5.3: Fetch Cognito Public Keys (JWKS)
-```python
-@lru_cache(maxsize=1)
-def get_jwks(region, user_pool_id):
-    url = f"https://cognito-idp.{region}.amazonaws.com/{user_pool_id}/.well-known/jwks.json"
-    with urllib.request.urlopen(url) as response:
-        return json.loads(response.read())
-
-jwks = get_jwks('us-west-2', 'us-west-2_BXDXcVh5V')
-```
-
-**JWKS Response**:
-```json
-{
-  "keys": [
-    {
-      "kid": "RByvApnsXeVzGL5V82A+JJ12Mloj0eRtFMH2mtghoJk=",
-      "alg": "RS256",
-      "kty": "RSA",
-      "use": "sig",
-      "n": "xGOr-H7A...",
-      "e": "AQAB"
-    }
-  ]
-}
-```
-
-#### 5.4: Find Matching Public Key
-```python
-key = next((k for k in jwks['keys'] if k['kid'] == header['kid']), None)
-if not key:
-    raise Exception('Public key not found in JWKS')
-
-public_key = RSAAlgorithm.from_jwk(key)
-```
-
-#### 5.5: Verify Signature & Decode
-```python
-claims = jwt.decode(
-    token,
-    public_key,
-    algorithms=['RS256'],
-    issuer="https://cognito-idp.us-west-2.amazonaws.com/us-west-2_BXDXcVh5V",
-    options={
-        "verify_signature": True,  # ✅ RSA signature verification
-        "verify_exp": True,        # ✅ Token not expired
-        "verify_iss": True         # ✅ Correct Cognito pool
-    }
-)
-```
-
-**Security Validations**:
-- **Signature**: Verifies token signed by Cognito private key using RSA-256
-- **Expiration**: Checks `exp` claim < current time
-- **Issuer**: Validates `iss` matches expected Cognito User Pool
-
-#### 5.6: Validate Token Use
-```python
-if claims.get('token_use') != 'access':
-    raise Exception(f"Invalid token_use: {claims.get('token_use')}")
-```
-
-#### 5.7: Validate Scopes
-```python
-token_scopes = set(claims.get('scope', '').split())
-required_scopes = {'prometheus-mcp-server/read', 'prometheus-mcp-server/write'}
-
-if not required_scopes.issubset(token_scopes):
-    raise Exception(f'Insufficient scopes. Required: {required_scopes}, Got: {token_scopes}')
-```
-
-#### 5.8: Generate IAM Policy
-```python
-policy = {
-    'principalId': claims['client_id'],
-    'policyDocument': {
-        'Version': '2012-10-17',
-        'Statement': [{
-            'Action': 'execute-api:Invoke',
-            'Effect': 'Allow',
-            'Resource': event['methodArn']
-        }]
-    },
-    'context': {
-        'clientId': claims['client_id'],
-        'scope': claims.get('scope', ''),
-        'issuer': claims['iss'],
-        'expiresAt': str(claims['exp'])
-    }
-}
-return policy
-```
-
-**CloudWatch Logs**:
-```
-✅ Token signature verified. Issuer: https://cognito-idp.us-west-2.amazonaws.com/us-west-2_BXDXcVh5V
-✅ Token expiration validated. Expires: 1764833503
-✅ Scopes validated: {'prometheus-mcp-server/read', 'prometheus-mcp-server/write'}
-✅ Authorization successful for client: 3hifr4ho59ivsvrvqnt1bt3efu
-```
-
-### Step 6: API Gateway Receives Policy
-
-**Policy Response**:
-```json
-{
-  "principalId": "3hifr4ho59ivsvrvqnt1bt3efu",
+  "principalId": "user",
   "policyDocument": {
     "Version": "2012-10-17",
     "Statement": [{
       "Action": "execute-api:Invoke",
       "Effect": "Allow",
-      "Resource": "arn:aws:execute-api:us-west-2:338293206254:xlakxojll5/prod/POST/mcp"
+      "Resource": "arn:aws:execute-api:us-east-1:338293206254:*/prod/POST/mcp"
     }]
-  },
-  "context": {
-    "clientId": "3hifr4ho59ivsvrvqnt1bt3efu",
-    "scope": "prometheus-mcp-server/read prometheus-mcp-server/write"
   }
 }
 ```
 
-**API Gateway Actions**:
-1. Receives Allow policy
-2. Caches policy for 5 minutes (keyed by `principalId`)
-3. Proceeds with Lambda invocation
+### 6. Lambda Invocation
 
-## Phase 4: MCP Lambda Execution
+**Component**: API Gateway
 
-### Step 7: API Gateway Invokes MCP Lambda
+If authorized, API Gateway invokes the MCP Lambda function with the event:
 
-**Lambda Invocation Event**:
 ```json
 {
   "httpMethod": "POST",
-  "path": "/prod/mcp",
-  "body": "{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":1}",
+  "path": "/mcp",
   "headers": {
-    "Authorization": "Bearer eyJ...",
+    "Authorization": "Bearer eyJraWQiOiJ...",
     "Content-Type": "application/json"
   },
-  "requestContext": {
-    "authorizer": {
-      "clientId": "3hifr4ho59ivsvrvqnt1bt3efu",
-      "scope": "prometheus-mcp-server/read prometheus-mcp-server/write",
-      "issuer": "https://cognito-idp.us-west-2.amazonaws.com/us-west-2_BXDXcVh5V",
-      "expiresAt": "1764833503"
-    }
-  }
+  "body": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{...}}"
 }
 ```
 
-### Step 8: MCP Lambda Processing
+### 7. Lambda Handler Entry Point
 
-**File**: `lambda-mcp-wrapper/lambda/lambda_function.py`
+**Component**: `lambda_function_v2.py`  
+**Function**: `PrometheusLambdaMCPStack-MCPFunction073462F8-a8KZ6hV11SHt`  
+**Handler**: `lambda_function_v2.handler`
 
-#### 8.1: Parse Event
 ```python
 def handler(event, context):
-    if 'httpMethod' in event:
-        # API Gateway format
-        body = event.get('body', '{}')
-        mcp_request = json.loads(body)
-```
-
-#### 8.2: Route to MCP Handler
-```python
-method = mcp_request.get('method')  # "tools/list"
-
-if method == 'tools/list':
-    return handle_tools_list(mcp_request)
-```
-
-#### 8.3: Handle tools/list
-```python
-def handle_tools_list(request):
+    # Extract JSON-RPC request from API Gateway event
+    body = json.loads(event.get('body', '{}'))
+    
+    # Create STDIO adapter instance
+    adapter = StdioAdapter(prometheus_mcp_server)
+    
+    # Handle request asynchronously
+    result = asyncio.run(adapter.handle_jsonrpc_request(body))
+    
+    # Return HTTP response
     return {
-        'jsonrpc': '2.0',
-        'id': request.get('id'),
-        'result': {
-            'tools': [
-                {
-                    'name': 'GetAvailableWorkspaces',
-                    'description': 'List available Prometheus workspaces',
-                    'inputSchema': {
-                        'type': 'object',
-                        'properties': {
-                            'region': {'type': 'string', 'description': 'AWS region'}
-                        }
-                    }
-                },
-                {
-                    'name': 'ExecuteQuery',
-                    'description': 'Execute PromQL instant queries',
-                    'inputSchema': {...}
-                },
-                {
-                    'name': 'ExecuteRangeQuery',
-                    'description': 'Execute PromQL range queries',
-                    'inputSchema': {...}
-                },
-                {
-                    'name': 'ListMetrics',
-                    'description': 'Get sorted list of metric names',
-                    'inputSchema': {...}
-                },
-                {
-                    'name': 'GetServerInfo',
-                    'description': 'Get Prometheus server info',
-                    'inputSchema': {...}
-                }
-            ]
-        }
+        'statusCode': 200,
+        'body': json.dumps(result),
+        'headers': {'Content-Type': 'application/json'}
     }
 ```
 
-#### 8.4: Wrap in API Gateway Response
+### 8. STDIO Adapter Routing
+
+**Component**: `stdio_adapter.py`
+
 ```python
-return {
-    'statusCode': 200,
-    'headers': {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-    },
-    'body': json.dumps(mcp_response)
+async def handle_jsonrpc_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    method = request.get('method')
+    
+    # Route based on JSON-RPC method
+    if method == 'initialize':
+        return await self._handle_initialize(request_id)
+    elif method == 'tools/list':
+        return await self._handle_tools_list(request_id)
+    elif method == 'tools/call':
+        return await self._handle_tools_call(request_id, params)
+```
+
+### 9. Tool Execution
+
+**Component**: `stdio_adapter._handle_tools_call()`
+
+```python
+async def _handle_tools_call(self, request_id, params):
+    tool_name = params.get('name')  # "ListMetrics"
+    arguments = params.get('arguments')  # {"workspace_id": "ws-xxx"}
+    
+    # Call FastMCP ToolManager
+    result = await self.mcp_server._tool_manager.call_tool(
+        name=tool_name,
+        arguments=arguments,
+        context=None,
+        convert_result=True
+    )
+    
+    # Handle None result (error case)
+    if result is None:
+        return {
+            'jsonrpc': '2.0',
+            'id': request_id,
+            'error': {
+                'code': -32603,
+                'message': f'Tool {tool_name} returned None'
+            }
+        }
+    
+    # Format result as JSON-RPC response
+    return format_response(result, request_id)
+```
+
+### 10. FastMCP Tool Manager
+
+**Component**: FastMCP ToolManager
+
+**Process**:
+1. Finds registered tool by name (`ListMetrics`)
+2. Validates arguments against tool schema
+3. Injects `Context` object
+4. Calls the actual tool function
+
+### 11. Tool Implementation
+
+**Component**: `prometheus_mcp_server/server.py`
+
+```python
+@mcp.tool(name='ListMetrics')
+async def list_metrics(
+    ctx: Context,
+    workspace_id: Optional[str] = None,
+    region: Optional[str] = None,
+    profile: Optional[str] = None
+) -> MetricsList:
+    # Configure workspace
+    workspace_config = await configure_workspace_for_request(
+        ctx, workspace_id, region, profile
+    )
+    
+    # Make API request to Prometheus
+    data = await PrometheusClient.make_request(
+        prometheus_url=workspace_config['prometheus_url'],
+        endpoint='label/__name__/values',
+        params={},
+        region=workspace_config['region'],
+        profile=workspace_config['profile']
+    )
+    
+    return MetricsList(metrics=sorted(data))
+```
+
+### 12. AWS API Call
+
+**Component**: PrometheusClient
+
+**Request**:
+```http
+GET https://aps-workspaces.us-east-1.amazonaws.com/workspaces/ws-xxx/api/v1/label/__name__/values
+Authorization: AWS4-HMAC-SHA256 Credential=...
+X-Amz-Date: 20251204T185102Z
+```
+
+**Process**:
+1. Uses AWS SigV4 signing
+2. Authenticates with Lambda's IAM role
+3. Queries Amazon Managed Prometheus
+
+**Response**:
+```json
+{
+  "status": "success",
+  "data": [
+    "scrape_duration_seconds",
+    "scrape_samples_scraped",
+    "up"
+  ]
 }
 ```
 
-### Step 9: API Gateway Returns Response
+### 13. Response Flow Back
 
-**HTTP Response**:
-```http
-HTTP/1.1 200 OK
-Content-Type: application/json
-Access-Control-Allow-Origin: *
+**Component**: Full stack (reverse order)
 
+1. **Tool Function** returns `MetricsList(metrics=[...])`
+
+2. **FastMCP ToolManager** converts to tuple:
+   ```python
+   (content_list, metadata)
+   ```
+
+3. **STDIO Adapter** wraps in JSON-RPC format:
+   ```json
+   {
+     "jsonrpc": "2.0",
+     "id": 1,
+     "result": {
+       "content": [{
+         "type": "text",
+         "text": "{\"metrics\": [\"scrape_duration_seconds\", ...]}"
+       }]
+     }
+   }
+   ```
+
+4. **Lambda Handler** returns HTTP response:
+   ```json
+   {
+     "statusCode": 200,
+     "headers": {"Content-Type": "application/json"},
+     "body": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{...}}"
+   }
+   ```
+
+5. **API Gateway** forwards response to client
+
+6. **MCP Client** receives and parses response
+
+## Error Handling
+
+### Missing workspace_id
+
+**Request**:
+```json
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "result": {
-    "tools": [
-      {
-        "name": "GetAvailableWorkspaces",
-        "description": "List available Prometheus workspaces",
-        "inputSchema": {...}
-      },
-      {
-        "name": "ExecuteQuery",
-        "description": "Execute PromQL instant queries",
-        "inputSchema": {...}
-      },
-      {
-        "name": "ExecuteRangeQuery",
-        "description": "Execute PromQL range queries",
-        "inputSchema": {...}
-      },
-      {
-        "name": "ListMetrics",
-        "description": "Get sorted list of metric names",
-        "inputSchema": {...}
-      },
-      {
-        "name": "GetServerInfo",
-        "description": "Get Prometheus server info",
-        "inputSchema": {...}
-      }
-    ]
+  "method": "tools/call",
+  "params": {
+    "name": "ListMetrics",
+    "arguments": {}
   }
 }
-```
-
-### Step 10: Client Receives Response
-
-**Client Processing**:
-```python
-response = requests.post(mcp_url, json=payload, headers=headers)
-data = response.json()
-
-tools = data['result']['tools']
-print(f"✅ Found {len(tools)} tools")
-for tool in tools:
-    print(f"   - {tool['name']}: {tool['description']}")
-```
-
-## Performance Metrics
-
-### Cold Start (First Request)
-```
-Total: ~2000ms
-├─ JWT Authorizer Lambda init: 267ms
-├─ JWKS fetch: 1500ms
-├─ Token verification: 179ms
-└─ MCP Lambda execution: 54ms
-```
-
-### Warm Request (Cached)
-```
-Total: ~2ms
-├─ JWT Authorizer (cached policy): 0ms
-├─ Token verification: 1.72ms
-└─ MCP Lambda execution: 0.28ms
-```
-
-### Caching Strategy
-1. **JWKS Cache**: `@lru_cache` in Lambda (lifetime of container)
-2. **Policy Cache**: API Gateway (5 minutes, keyed by `principalId`)
-3. **Token Cache**: Client-side (59 minutes, refresh before expiry)
-
-## Error Scenarios
-
-### 1. Invalid Token Signature
-
-**Flow**:
-```
-Client → API Gateway → JWT Authorizer
-                       ↓
-                    jwt.decode() fails
-                    jwt.InvalidSignatureError
-                       ↓
-                    raise Exception('Unauthorized')
-                       ↓
-API Gateway ← 401 Unauthorized
 ```
 
 **Response**:
 ```json
 {
-  "message": "Unauthorized"
-}
-```
-
-### 2. Expired Token
-
-**Flow**:
-```
-JWT Authorizer checks exp claim
-    ↓
-exp (1764829903) < current_time (1764833600)
-    ↓
-jwt.ExpiredSignatureError
-    ↓
-401 Unauthorized
-```
-
-**CloudWatch Log**:
-```
-❌ Authorization failed: Token expired
-```
-
-### 3. Missing Scopes
-
-**Flow**:
-```
-JWT Authorizer validates scopes
-    ↓
-token_scopes = {'prometheus-mcp-server/read'}  # Missing write
-required_scopes = {'prometheus-mcp-server/read', 'prometheus-mcp-server/write'}
-    ↓
-not required_scopes.issubset(token_scopes)
-    ↓
-raise Exception('Insufficient scopes')
-    ↓
-401 Unauthorized
-```
-
-**CloudWatch Log**:
-```
-❌ Authorization failed: Insufficient scopes. Required: {'prometheus-mcp-server/read', 'prometheus-mcp-server/write'}, Got: {'prometheus-mcp-server/read'}
-```
-
-### 4. Wrong Issuer
-
-**Flow**:
-```
-JWT Authorizer validates issuer
-    ↓
-claims['iss'] = "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_XXXXX"
-expected_issuer = "https://cognito-idp.us-west-2.amazonaws.com/us-west-2_BXDXcVh5V"
-    ↓
-jwt.InvalidIssuerError
-    ↓
-401 Unauthorized
-```
-
-**CloudWatch Log**:
-```
-❌ Authorization failed: Invalid issuer - Token issuer does not match expected issuer
-```
-
-## Security Features
-
-### 1. Signature Verification (RSA-256)
-- **Purpose**: Prevents token forgery
-- **Implementation**: Verifies token signed by Cognito private key
-- **Protection**: Only Cognito can create valid tokens
-
-### 2. Token Expiration
-- **Purpose**: Limits token lifetime
-- **Implementation**: Validates `exp` claim
-- **Configuration**: 1 hour (3600 seconds)
-
-### 3. Issuer Validation
-- **Purpose**: Prevents token reuse across pools
-- **Implementation**: Validates `iss` claim matches User Pool
-- **Protection**: Tokens from other Cognito pools rejected
-
-### 4. Scope Validation
-- **Purpose**: Enforces least privilege
-- **Implementation**: Checks required scopes present
-- **Required**: `prometheus-mcp-server/read` + `prometheus-mcp-server/write`
-
-### 5. Token Use Validation
-- **Purpose**: Ensures correct token type
-- **Implementation**: Validates `token_use` = "access"
-- **Protection**: Rejects ID tokens or refresh tokens
-
-## Configuration Files
-
-### mcp-server-config.json
-```json
-{
-  "name": "Prometheus MCP Lambda Server",
-  "endpoint": "https://xlakxojll5.execute-api.us-west-2.amazonaws.com/prod/mcp",
-  "authorization_flow": "OAuth Client Credentials",
-  "authorization_configuration": {
-    "client_id": "3hifr4ho59ivsvrvqnt1bt3efu",
-    "client_secret": "jpnq9jsrco7brkqruol8nds7cmde44ato23ja17k6m86nq55gmf",
-    "exchange_url": "https://mcp-uswest2-93206254-1764351429299-voq6g9xy-1of9.auth.us-west-2.amazoncognito.com/oauth2/token",
-    "exchange_parameters": [
-      {"key": "grant_type", "value": "client_credentials"},
-      {"key": "scope", "value": "prometheus-mcp-server/read prometheus-mcp-server/write"}
-    ]
+  "jsonrpc": "2.0",
+  "id": 1,
+  "error": {
+    "code": -32603,
+    "message": "Tool ListMetrics returned None - likely missing required parameters or configuration error"
   }
 }
 ```
 
-### Environment Variables (JWT Authorizer)
-```bash
-USER_POOL_ID=us-west-2_BXDXcVh5V
-COGNITO_ISSUER=https://cognito-idp.us-west-2.amazonaws.com/us-west-2_BXDXcVh5V
-REQUIRED_SCOPES=prometheus-mcp-server/read prometheus-mcp-server/write
-AWS_REGION=us-west-2  # Set by Lambda runtime
+### Invalid JWT Token
+
+**Response**: HTTP 403 Forbidden from API Gateway (before reaching Lambda)
+
+### Tool Execution Error
+
+**Response**:
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "error": {
+    "code": -32603,
+    "message": "Tool execution failed: Error listing metrics: ..."
+  }
+}
 ```
 
-## Testing
+## Performance Characteristics
 
-### Test with curl
-```bash
-# Get token
-TOKEN=$(curl -s -X POST "https://mcp-uswest2-93206254-1764351429299-voq6g9xy-1of9.auth.us-west-2.amazoncognito.com/oauth2/token" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "grant_type=client_credentials&scope=prometheus-mcp-server/read prometheus-mcp-server/write" \
-  -u "3hifr4ho59ivsvrvqnt1bt3efu:jpnq9jsrco7brkqruol8nds7cmde44ato23ja17k6m86nq55gmf" | jq -r '.access_token')
+| Stage | Typical Latency |
+|-------|----------------|
+| OAuth Token Request | 100-200ms |
+| API Gateway + JWT Auth | 50-100ms |
+| Lambda Cold Start | 1-3s (first request) |
+| Lambda Warm | 100-300ms |
+| AWS Prometheus API | 200-500ms |
+| **Total (Cold)** | **1.5-4s** |
+| **Total (Warm)** | **450-1100ms** |
 
-# Test MCP endpoint
-curl -X POST "https://xlakxojll5.execute-api.us-west-2.amazonaws.com/prod/mcp" \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","method":"tools/list","id":1}' | jq .
+## Security Flow
+
+```
+Client Credentials → JWT Token → Signature Validation → Scope Check → IAM Policy → Lambda Execution
 ```
 
-### Test with Python
-```bash
-python3 test_lambda_mcp_endpoint.py
-```
+1. **Client Authentication**: OAuth 2.0 Client Credentials flow
+2. **Token Validation**: JWT signature verification using Cognito JWKS
+3. **Authorization**: Scope-based access control (`prometheus-mcp-server/read`)
+4. **AWS Authentication**: Lambda IAM role with AMP permissions
+5. **API Security**: SigV4 signed requests to Prometheus
 
-### Test with Interactive Script
-```bash
-python3 test_mcp_interactive.py
-```
+## Key Components
+
+| Component | Purpose | Technology |
+|-----------|---------|------------|
+| MCP Client | Initiates requests | Strands/Cursor/Cline |
+| Cognito | OAuth token provider | AWS Cognito User Pool |
+| API Gateway | HTTP endpoint | AWS API Gateway REST API |
+| JWT Authorizer | Token validation | Lambda (Python 3.11) |
+| MCP Lambda | Request processing | Lambda (Python 3.11) |
+| STDIO Adapter | Protocol bridge | Custom Python |
+| FastMCP | Tool management | MCP SDK |
+| Prometheus Client | AWS API calls | Custom Python + boto3 |
+| Amazon Prometheus | Metrics storage | AWS Managed Service |
+
+## Configuration Files
+
+- **mcp-server-config.json**: Client configuration (endpoint, OAuth)
+- **lambda_function_v2.py**: Lambda entry point
+- **stdio_adapter.py**: JSON-RPC to FastMCP bridge
+- **prometheus_mcp_server/server.py**: Tool implementations
 
 ## Monitoring
 
-### CloudWatch Logs
+- **CloudWatch Logs**: `/aws/lambda/PrometheusLambdaMCPStack-MCPFunction073462F8-a8KZ6hV11SHt`
+- **API Gateway Logs**: Request/response logging
+- **JWT Authorizer Logs**: Authentication failures
+- **Metrics**: Lambda invocations, duration, errors
 
-**JWT Authorizer**:
-```bash
-aws logs tail /aws/lambda/PrometheusLambdaMCPAPIGatewa-JWTAuthorizerE8D8D90E-cVQK42dNjp4R \
-  --region us-west-2 --follow
-```
+## Related Documentation
 
-**MCP Lambda**:
-```bash
-aws logs tail /aws/lambda/PrometheusLambdaMCPStack-MCPFunction073462F8-PNSas4IktDmz \
-  --region us-west-2 --follow
-```
-
-### Key Metrics
-- Authorization success rate
-- Token validation latency
-- JWKS fetch latency
-- MCP request latency
-- Error rates by type
-
-## Troubleshooting
-
-### Issue: 401 Unauthorized
-**Check**:
-1. Token not expired: `jwt.io` to decode and check `exp`
-2. Correct scopes: Check `scope` claim
-3. Valid signature: Verify `kid` matches JWKS
-4. Correct issuer: Check `iss` claim
-
-### Issue: 403 Forbidden
-**Check**:
-1. API Gateway resource policy
-2. Lambda execution role permissions
-3. Cognito User Pool configuration
-
-### Issue: Slow responses
-**Check**:
-1. Cold start (first request after idle)
-2. JWKS fetch latency
-3. Lambda memory configuration
-4. Network latency
-
-## References
-
-- [OAuth 2.0 RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749)
-- [JWT RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519)
-- [AWS Cognito Documentation](https://docs.aws.amazon.com/cognito/)
-- [API Gateway Lambda Authorizers](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html)
-- [MCP Specification](https://modelcontextprotocol.io/specification/)
+- [Authentication Methods](./AUTHENTICATION_METHODS.md)
+- [Architecture Diagram](./solution_architecture.png)
+- [README](../README.md)

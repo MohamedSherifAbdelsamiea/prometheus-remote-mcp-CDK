@@ -148,6 +148,17 @@ class StdioAdapter:
                 convert_result=True  # Convert result to MCP format
             )
             
+            # Handle None result (FastMCP returns None on some errors)
+            if result is None:
+                return {
+                    'jsonrpc': '2.0',
+                    'id': request_id,
+                    'error': {
+                        'code': -32603,
+                        'message': f'Tool {tool_name} returned None - likely missing required parameters or configuration error'
+                    }
+                }
+            
             # Format the result according to MCP protocol
             # FastMCP returns (content, metadata) tuple
             if isinstance(result, tuple) and len(result) == 2:

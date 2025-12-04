@@ -112,7 +112,8 @@ jq --arg client_id "$CLIENT_ID" \
    '.authorization_configuration.client_id = $client_id | 
     .authorization_configuration.client_secret = $client_secret |
     .endpoint = $endpoint |
-    .authorization_configuration.exchange_url = $token_url' \
+    .authorization_configuration.exchange_url = $token_url |
+    .authorization_configuration.exchange_parameters[1].value = "prometheus-mcp-server/read"' \
     "$CONFIG_FILE" > "${CONFIG_FILE}.tmp" && mv "${CONFIG_FILE}.tmp" "$CONFIG_FILE"
 
 echo "✅ Successfully updated $CONFIG_FILE with actual values"
