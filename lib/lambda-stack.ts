@@ -42,7 +42,7 @@ export class LambdaStack extends cdk.Stack {
     // Lambda function
     this.mcpFunction = new lambda.Function(this, 'MCPFunction', {
       runtime: lambda.Runtime.PYTHON_3_11,
-      handler: 'lambda_function.handler',
+      handler: 'lambda_function_v2.handler',  // Updated to use new MCP SDK handler
       code: lambda.Code.fromAsset('lambda-mcp-wrapper/lambda'),
       timeout: cdk.Duration.seconds(30),
       memorySize: 512,
@@ -50,7 +50,7 @@ export class LambdaStack extends cdk.Stack {
       environment: {
         LOG_LEVEL: 'INFO',
       },
-      description: 'Prometheus MCP Server Lambda Function',
+      description: 'Prometheus MCP Server Lambda Function (MCP SDK)',
     });
 
     // Outputs

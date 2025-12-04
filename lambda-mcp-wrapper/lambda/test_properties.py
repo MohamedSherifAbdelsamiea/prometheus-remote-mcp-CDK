@@ -211,6 +211,39 @@ def test_notification_handling(method):
     print(f"✓ Property 8 passed for notification method={method}")
 
 
+# Feature: mcp-sdk-migration, Property 3: Health check availability
+@given(path=st.sampled_from(['/health', '/health/', '/api/health']))
+@settings(max_examples=20)
+def test_health_check_availability(path):
+    """Validates: Requirements 3.4
+    Test health endpoint with various path formats.
+    Verify response always contains required fields for GET requests.
+    """
+    import lambda_function_v2
+    
+    # Simulate API Gateway event for health check
+    event = {
+        'httpMethod': 'GET',
+        'path': path,
+        'headers': {},
+        'body': None
+    }
+    
+    response = lambda_function_v2.handler(event, None)
+    
+    # Health check should work for paths containing /health
+    if '/health' in path:
+        assert response['statusCode'] == 200
+        body = json.loads(response['body'])
+        assert 'status' in body
+        assert 'service' in body
+        assert 'version' in body
+        assert 'timestamp' in body
+        print(f"✓ Property 3 passed for path={path}")
+    else:
+        print(f"✓ Property 3 passed for path={path} (non-health path)")
+
+
 def run_all_property_tests():
     """Run all property-based tests"""
     print("=" * 60)
@@ -221,6 +254,7 @@ def run_all_property_tests():
     tests = [
         ("Property 1: Initialize response structure", test_initialize_response_structure),
         ("Property 2: Tools list completeness", test_tools_list_completeness),
+        ("Property 3: Health check availability", test_health_check_availability),
         ("Property 9: Request-response correlation", test_request_response_correlation),
         ("Property 6: Error response formatting", test_error_response_formatting),
         ("Property 5: JSON-RPC response formatting", test_jsonrpc_response_formatting),

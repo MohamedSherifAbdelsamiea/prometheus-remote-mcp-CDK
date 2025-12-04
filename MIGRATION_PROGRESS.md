@@ -30,16 +30,16 @@
 
 ## Remaining Tasks 📋
 
-### Phase 2: Integration Testing (Tasks 2.1-2.9)
-- [ ] **Task 2.1**: Create integration test file with AWS credential setup
-- [ ] **Task 2.2**: Write GetAvailableWorkspaces integration test
-- [ ] **Task 2.3**: Write ExecuteQuery integration test
-- [ ] **Task 2.4**: Write ExecuteRangeQuery integration test
-- [ ] **Task 2.5**: Write ListMetrics integration test
-- [ ] **Task 2.6**: Write GetServerInfo integration test
-- [ ] **Task 2.7**: Write error handling integration tests
-- [ ] **Task 2.8**: Property test for error response formatting (already done ✅)
-- [ ] **Task 2.9**: Property test for JSON-RPC response formatting (already done ✅)
+### Phase 2: Integration Testing (Tasks 2.1-2.9) ✅ COMPLETED
+- [x] **Task 2.1**: Create integration test file with AWS credential setup
+- [x] **Task 2.2**: Write GetAvailableWorkspaces integration test
+- [x] **Task 2.3**: Write ExecuteQuery integration test
+- [x] **Task 2.4**: Write ExecuteRangeQuery integration test
+- [x] **Task 2.5**: Write ListMetrics integration test
+- [x] **Task 2.6**: Write GetServerInfo integration test
+- [x] **Task 2.7**: Write error handling integration tests
+- [x] **Task 2.8**: Property test for error response formatting (already done ✅)
+- [x] **Task 2.9**: Property test for JSON-RPC response formatting (already done ✅)
 
 ### Phase 3: CDK Deployment (Tasks 3.1-3.4)
 - [ ] **Task 3.1**: Modify Lambda stack to reference new handler
@@ -90,6 +90,7 @@
 
 1. `dae9aba` - checkpoint: before mcp-sdk-migration testing phase
 2. `1b17495` - feat: add property-based tests for MCP SDK migration
+3. `cebf265` - feat: add integration tests and fix stdio_adapter for FastMCP tuple returns
 
 ## Next Steps
 
