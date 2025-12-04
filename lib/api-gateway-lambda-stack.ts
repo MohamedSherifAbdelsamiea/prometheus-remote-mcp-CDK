@@ -29,7 +29,10 @@ export class APIGatewayLambdaStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(30),
       environment: {
         USER_POOL_ID: userPool.userPoolId,
+        COGNITO_ISSUER: `https://cognito-idp.${this.region}.amazonaws.com/${userPool.userPoolId}`,
+        REQUIRED_SCOPES: 'prometheus-mcp-server/read',
       },
+      description: 'JWT Authorizer with signature verification for MCP API',
     });
 
     // API Gateway
