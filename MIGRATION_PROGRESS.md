@@ -41,11 +41,11 @@
 - [x] **Task 2.8**: Property test for error response formatting (already done ✅)
 - [x] **Task 2.9**: Property test for JSON-RPC response formatting (already done ✅)
 
-### Phase 3: CDK Deployment (Tasks 3.1-3.4)
-- [ ] **Task 3.1**: Modify Lambda stack to reference new handler
-- [ ] **Task 3.2**: Verify Lambda configuration
-- [ ] **Task 3.3**: Synthesize and validate CDK changes
-- [ ] **Task 3.4**: Property test for health check availability
+### Phase 3: CDK Deployment (Tasks 3.1-3.4) ✅ COMPLETED
+- [x] **Task 3.1**: Modify Lambda stack to reference new handler
+- [x] **Task 3.2**: Verify Lambda configuration
+- [x] **Task 3.3**: Synthesize and validate CDK changes
+- [x] **Task 3.4**: Property test for health check availability
 
 ### Phase 4: AWS Deployment & Validation (Tasks 4.1-4.8)
 - [ ] **Task 4.1**: Deploy Lambda function
@@ -84,13 +84,15 @@
 ## Test Files Created
 
 1. **test_migration.py** - Original unit tests (3 tests)
-2. **test_properties.py** - Property-based tests (7 properties)
+2. **test_properties.py** - Property-based tests (8 properties)
+3. **test_integration.py** - Integration tests with AWS services (7 tests)
 
 ## Git Commits
 
 1. `dae9aba` - checkpoint: before mcp-sdk-migration testing phase
 2. `1b17495` - feat: add property-based tests for MCP SDK migration
 3. `cebf265` - feat: add integration tests and fix stdio_adapter for FastMCP tuple returns
+4. `0cc9933` - feat: update CDK stack to use new MCP SDK handler and add health check test
 
 ## Next Steps
 
