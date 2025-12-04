@@ -1,4 +1,0 @@
-# file: /Users/mdsherif/Library/CloudStorage/WorkDocsDrive-Documents/MyMac/05Work/03 Ericsson/04 Bussiness Units/03 Cognitive Solution/04 Cloudsmith/01 Demo/06 prometheus-lambda-mcp-cdk/lambda-mcp-wrapper/lambda/mcp/server/fastmcp/utilities/types.py
-# hypothesis_version: 6.148.6
-
-['.aac', '.flac', '.gif', '.jpeg', '.jpg', '.m4a', '.mp3', '.ogg', '.png', '.wav', '.webp', 'audio', 'audio/aac', 'audio/flac', 'audio/mp4', 'audio/mpeg', 'audio/ogg', 'audio/wav', 'image', 'image/gif', 'image/jpeg', 'image/png', 'image/webp', 'rb']

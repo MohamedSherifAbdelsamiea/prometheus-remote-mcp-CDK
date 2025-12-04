@@ -1,4 +1,0 @@
-# file: /Users/mdsherif/Library/CloudStorage/WorkDocsDrive-Documents/MyMac/05Work/03 Ericsson/04 Bussiness Units/03 Cognitive Solution/04 Cloudsmith/01 Demo/06 prometheus-lambda-mcp-cdk/lambda-mcp-wrapper/lambda/starlette/routing.py
-# hypothesis_version: 6.148.6
-
-[404, 405, '$', ', ', '/', '/{path:path}', ':', 'Allow', 'GET', 'HEAD', 'Method Not Allowed', 'Not Found', '^', '_T', '__name__', 'app', 'app_root_path', 'endpoint', 'host', 'http', 'lifespan', 'message', 'method', 'path', 'path_params', 'root_path', 'router', 'routes', 's', 'shutdown', 'startup', 'state', 'str', 'type', 'websocket', '{', '{%s}', '}']

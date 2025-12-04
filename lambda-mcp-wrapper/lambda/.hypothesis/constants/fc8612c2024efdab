@@ -1,4 +1,0 @@
-# file: /Users/mdsherif/Library/CloudStorage/WorkDocsDrive-Documents/MyMac/05Work/03 Ericsson/04 Bussiness Units/03 Cognitive Solution/04 Cloudsmith/01 Demo/06 prometheus-lambda-mcp-cdk/lambda-mcp-wrapper/lambda/mcp/server/streamable_http.py
-# hypothesis_version: 6.148.6
-
-[',', ', ', '2.0', ';', 'Allow', 'Cache-Control', 'Closing SSE writer', 'Connection', 'Content-Type', 'DELETE', 'Error in SSE writer', 'GET', 'GET, POST, DELETE', 'Method Not Allowed', 'POST', 'SSE response error', '^[\\x21-\\x7E]+$', '_GET_stream', 'accept', 'application/json', 'content-type', 'data', 'event', 'id', 'initialize', 'keep-alive', 'last-event-id', 'mcp-protocol-version', 'mcp-session-id', 'message', 'server-error', 'text/event-stream']

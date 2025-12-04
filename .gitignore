@@ -9,3 +9,12 @@ mcp-server-config.json
 .env
 *.swp
 .DS_Store
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.hypothesis/
+
+# macOS
+.DS_Store

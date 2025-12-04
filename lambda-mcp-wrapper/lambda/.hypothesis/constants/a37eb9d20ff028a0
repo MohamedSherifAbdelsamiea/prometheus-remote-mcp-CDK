@@ -1,4 +1,0 @@
-# file: /Users/mdsherif/Library/CloudStorage/WorkDocsDrive-Documents/MyMac/05Work/03 Ericsson/04 Bussiness Units/03 Cognitive Solution/04 Cloudsmith/01 Demo/06 prometheus-lambda-mcp-cdk/lambda-mcp-wrapper/lambda/referencing/jsonschema.py
-# hypothesis_version: 6.148.6
-
-['#', '$anchor', '$defs', '$dynamicAnchor', '$id', '$recursiveAnchor', '$ref', 'additionalItems', 'additionalProperties', 'allOf', 'anyOf', 'contains', 'contentSchema', 'definitions', 'dependencies', 'dependentSchemas', 'draft-03', 'draft-04', 'draft-06', 'draft-07', 'draft2019-09', 'draft2020-12', 'else', 'extends', 'id', 'if', 'items', 'not', 'oneOf', 'patternProperties', 'prefixItems', 'properties', 'propertyNames', 'then', 'unevaluatedItems']

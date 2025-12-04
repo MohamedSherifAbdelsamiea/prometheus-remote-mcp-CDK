@@ -1,4 +1,0 @@
-# file: /Users/mdsherif/Library/CloudStorage/WorkDocsDrive-Documents/MyMac/05Work/03 Ericsson/04 Bussiness Units/03 Cognitive Solution/04 Cloudsmith/01 Demo/06 prometheus-lambda-mcp-cdk/lambda-mcp-wrapper/lambda/requests/adapters.py
-# hypothesis_version: 6.148.6
-
-['//', 'CERT_NONE', 'CERT_REQUIRED', 'Content-Length', 'PoolManager', 'PreparedRequest', 'Proxy-Authorization', '_pool_block', '_pool_connections', '_pool_maxsize', 'bool | str | None', 'ca_cert_dir', 'ca_certs', 'cert_file', 'cert_reqs', 'config', 'headers', 'host', 'http', 'https', 'key_file', 'max_retries', 'port', 'scheme', 'socks', 'status', 'utf-8']

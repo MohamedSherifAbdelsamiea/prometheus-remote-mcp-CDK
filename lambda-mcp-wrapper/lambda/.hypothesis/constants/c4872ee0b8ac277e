@@ -1,4 +1,0 @@
-# file: /Users/mdsherif/Library/CloudStorage/WorkDocsDrive-Documents/MyMac/05Work/03 Ericsson/04 Bussiness Units/03 Cognitive Solution/04 Cloudsmith/01 Demo/06 prometheus-lambda-mcp-cdk/lambda-mcp-wrapper/lambda/click/parser.py
-# hypothesis_version: 6.148.6
-
-['-', '--', '=', 'Argument', 'Option', 'OptionParser', 'ParsingState', 'V', 'append', 'append_const', 'count', 'normalize_opt', 'split_arg_string', 'split_opt', 'store', 'store_const']

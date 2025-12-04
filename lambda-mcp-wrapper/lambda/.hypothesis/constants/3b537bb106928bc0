@@ -1,4 +1,0 @@
-# file: /Users/mdsherif/Library/CloudStorage/WorkDocsDrive-Documents/MyMac/05Work/03 Ericsson/04 Bussiness Units/03 Cognitive Solution/04 Cloudsmith/01 Demo/06 prometheus-lambda-mcp-cdk/lambda-mcp-wrapper/lambda/dateutil/relativedelta.py
-# hypothesis_version: 6.148.6
-
-[7.0, 1000000.0, 120, 151, 181, 212, 243, 273, 304, 334, 366, 86400, 999999, 1000000, ', ', 'FR', 'MO', 'SA', 'SU', 'TH', 'TU', 'WE', 'day', 'days', 'hour', 'hours', 'leapdays', 'microsecond', 'microseconds', 'minute', 'minutes', 'month', 'months', 'relativedelta', 'second', 'seconds', 'weekday', 'year', 'years', '{attr}={value:+g}', '{attr}={value}', '{classname}({attrs})']
