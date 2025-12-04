@@ -1,0 +1,4 @@
+# file: /Users/mdsherif/Library/CloudStorage/WorkDocsDrive-Documents/MyMac/05Work/03 Ericsson/04 Bussiness Units/03 Cognitive Solution/04 Cloudsmith/01 Demo/06 prometheus-lambda-mcp-cdk/lambda-mcp-wrapper/lambda/loguru/_datetime.py
+# hypothesis_version: 6.148.6
+
+[100, 1000, 10000, 100000, 1000000, '!UTC', '%', '%02d', '%03d', '%04d', '%05d', '%06d', '%Z', '%d', '%s', '%s%02d', '%s%02d%s%02d', '%s%09.06f', '+', '-', ':', 'A', 'AM', 'D', 'DD', 'DDD', 'DDDD', 'E', 'H', 'HH', 'M', 'MM', 'MMM', 'MMMM', 'PM', 'Q', 'S', 'SS', 'SSS', 'SSSS', 'SSSSS', 'SSSSSS', 'SSSSSSS', 'X', 'YY', 'YYYY', 'Z', 'ZZ', 'd', 'ddd', 'dddd', 'h', 'hh', 'm', 'mm', 's', 'ss', 'x', 'zz']

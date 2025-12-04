@@ -1,0 +1,4 @@
+# file: /Users/mdsherif/Library/CloudStorage/WorkDocsDrive-Documents/MyMac/05Work/03 Ericsson/04 Bussiness Units/03 Cognitive Solution/04 Cloudsmith/01 Demo/06 prometheus-lambda-mcp-cdk/lambda-mcp-wrapper/lambda/charset_normalizer/models.py
+# hypothesis_version: 6.148.6
+
+[0.0, 0.01, 0.02, 1.0, 100, 8192, '-', 'English', 'Latin Based', 'Unknown', '_', 'alphabets', 'ascii', 'chaos', 'coherence', 'encoding', 'encoding_aliases', 'has_sig_or_bom', 'is_preferred', 'language', 'path', 'replace', 'strict', 'unicode_path', 'utf-8', 'utf8', 'utf_8']

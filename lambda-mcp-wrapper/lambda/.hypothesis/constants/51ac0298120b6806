@@ -1,0 +1,4 @@
+# file: /Users/mdsherif/Library/CloudStorage/WorkDocsDrive-Documents/MyMac/05Work/03 Ericsson/04 Bussiness Units/03 Cognitive Solution/04 Cloudsmith/01 Demo/06 prometheus-lambda-mcp-cdk/lambda-mcp-wrapper/lambda/loguru/_string_parsers.py
+# hypothesis_version: 6.148.6
+
+[1e-06, 0.001, 1000, 1024, 3600, 86400, 604800, 2628000, 31536000, '%H', '%H:%M', '%H:%M:%S', '%H:%M:%S.%f', '%I %p', '%I:%M %S', '%I:%M:%S %p', '%I:%M:%S.%f %p', '+', 'B', 'Unparsable day', 'Unparsable time', '^(.*?)\\s+at\\s+(.*)$', 'b', 'daily', 'd|days?', 'friday', 'hourly', 'h|hours?', 'kmgtpezy', 'min(?:ute)?s?', 'monday', 'monthly', 'months?', 'ms|milliseconds?', 'saturday', 'sunday', 's|sec(?:ond)?s?', 'thursday', 'tuesday', 'us|microseconds?', 'w', 'wednesday', 'weekly', 'w|weeks?', 'yearly', 'y|years?']

@@ -1,0 +1,4 @@
+# file: /Users/mdsherif/Library/CloudStorage/WorkDocsDrive-Documents/MyMac/05Work/03 Ericsson/04 Bussiness Units/03 Cognitive Solution/04 Cloudsmith/01 Demo/06 prometheus-lambda-mcp-cdk/lambda-mcp-wrapper/lambda/urllib3/util/request.py
+# hypothesis_version: 6.148.6
+
+[',', ',br', ',zstd', '@@@SKIP_HEADER@@@', 'CONNECT', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'TRACE', 'accept-encoding', 'authorization', 'cache-control', 'connection', 'gzip,deflate', 'host', 'keep-alive', 'no-cache', 'proxy-authorization', 'read', 'seek', 'tell', 'user-agent', 'utf-8']

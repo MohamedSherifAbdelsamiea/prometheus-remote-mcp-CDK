@@ -1,0 +1,4 @@
+# file: /Users/mdsherif/Library/CloudStorage/WorkDocsDrive-Documents/MyMac/05Work/03 Ericsson/04 Bussiness Units/03 Cognitive Solution/04 Cloudsmith/01 Demo/06 prometheus-lambda-mcp-cdk/lambda-mcp-wrapper/lambda/httpx/_transports/wsgi.py
+# hypothesis_version: 6.148.6
+
+[443, '-', '127.0.0.1', 'CONTENT_LENGTH', 'CONTENT_TYPE', 'HTTP/1.1', 'HTTP_', 'PATH_INFO', 'QUERY_STRING', 'REMOTE_ADDR', 'REQUEST_METHOD', 'SCRIPT_NAME', 'SERVER_NAME', 'SERVER_PORT', 'SERVER_PROTOCOL', 'WSGITransport', '_', '_T', 'ascii', 'close', 'http', 'https', 'wsgi.errors', 'wsgi.input', 'wsgi.multiprocess', 'wsgi.multithread', 'wsgi.run_once', 'wsgi.url_scheme', 'wsgi.version']

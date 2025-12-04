@@ -1,0 +1,4 @@
+# file: /Users/mdsherif/Library/CloudStorage/WorkDocsDrive-Documents/MyMac/05Work/03 Ericsson/04 Bussiness Units/03 Cognitive Solution/04 Cloudsmith/01 Demo/06 prometheus-lambda-mcp-cdk/lambda-mcp-wrapper/lambda/loguru/_logger.py
+# hypothesis_version: 6.148.6
+
+["'%s'", '.', '<unknown>', 'CRITICAL', 'DEBUG', 'ERROR', 'INFO', 'Level', 'Level %d', 'SUCCESS', 'TRACE', 'WARNING', '__call__', '__name__', 'ascii', 'color', 'elapsed', 'encoding', 'exception', 'extra', 'file', 'function', 'icon', 'inf', 'level', 'line', 'lock', 'loguru_context', 'loop', 'message', 'module', 'name', 'no', 'process', 'read', 'record', 'thread', 'thread_locals', 'time', 'utf8', 'write', '{exception}']

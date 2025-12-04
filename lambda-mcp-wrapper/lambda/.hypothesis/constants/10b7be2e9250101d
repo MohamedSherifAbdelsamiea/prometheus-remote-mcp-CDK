@@ -1,0 +1,4 @@
+# file: /Users/mdsherif/Library/CloudStorage/WorkDocsDrive-Documents/MyMac/05Work/03 Ericsson/04 Bussiness Units/03 Cognitive Solution/04 Cloudsmith/01 Demo/06 prometheus-lambda-mcp-cdk/lambda-mcp-wrapper/lambda/loguru/_handler.py
+# hypothesis_version: 6.148.6
+
+['_lock', '_lock_acquired', '_owner_process', '_queue_lock', '_sink', '_thread', 'acquired', 'close', 'elapsed', 'exception', 'extra', 'file', 'function', 'icon', 'id', 'level', 'line', 'loguru-writer-%d', 'message', 'module', 'name', 'no', 'path', 'process', 'record', 'repr', 'seconds', 'text', 'thread', 'time', 'timestamp', 'traceback', 'type', 'value']

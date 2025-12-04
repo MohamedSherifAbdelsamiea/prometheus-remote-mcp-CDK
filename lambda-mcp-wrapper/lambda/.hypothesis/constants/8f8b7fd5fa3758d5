@@ -1,0 +1,4 @@
+# file: /Users/mdsherif/Library/CloudStorage/WorkDocsDrive-Documents/MyMac/05Work/03 Ericsson/04 Bussiness Units/03 Cognitive Solution/04 Cloudsmith/01 Demo/06 prometheus-lambda-mcp-cdk/lambda-mcp-wrapper/lambda/uvicorn/middleware/wsgi.py
+# hypothesis_version: 6.148.6
+
+[',', '-', 'CONTENT_LENGTH', 'CONTENT_TYPE', 'HTTP/%s', 'HTTP_%s', 'PATH_INFO', 'QUERY_STRING', 'REMOTE_ADDR', 'REQUEST_METHOD', 'SCRIPT_NAME', 'SERVER_NAME', 'SERVER_PORT', 'SERVER_PROTOCOL', '_', 'ascii', 'body', 'client', 'content-length', 'content-type', 'headers', 'http', 'http.response.body', 'http.response.start', 'http_version', 'latin1', 'localhost', 'method', 'more_body', 'path', 'query_string', 'root_path', 'scheme', 'server', 'status', 'type', 'utf8', 'wsgi.errors', 'wsgi.input', 'wsgi.multiprocess', 'wsgi.multithread', 'wsgi.run_once', 'wsgi.url_scheme', 'wsgi.version']

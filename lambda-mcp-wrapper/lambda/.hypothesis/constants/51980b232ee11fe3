@@ -1,0 +1,4 @@
+# file: /Users/mdsherif/Library/CloudStorage/WorkDocsDrive-Documents/MyMac/05Work/03 Ericsson/04 Bussiness Units/03 Cognitive Solution/04 Cloudsmith/01 Demo/06 prometheus-lambda-mcp-cdk/lambda-mcp-wrapper/lambda/uvicorn/middleware/message_logger.py
+# hypothesis_version: 6.148.6
+
+['%s [%d] Completed', '%s [%d] Receive %s', '%s [%d] Send %s', '%s:%d - ASGI', '<...>', '<{length} bytes>', '<{length} chars>', 'ASGI', 'ASGI3Application', 'ASGIReceiveCallable', 'ASGIReceiveEvent', 'ASGISendCallable', 'ASGISendEvent', 'WWWScope', 'body', 'bytes', 'client', 'headers', 'text', 'uvicorn.asgi']
