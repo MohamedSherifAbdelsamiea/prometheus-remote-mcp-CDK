@@ -2,6 +2,8 @@
 
 Production-ready Prometheus MCP (Model Context Protocol) server deployed as AWS Lambda with API Gateway and Cognito authentication.
 
+**✅ MCP SDK Migration Complete** - Now using official MCP SDK with STDIO adapter (December 2024)
+
 ## 🏗️ **Architecture Overview**
 
 ```
@@ -102,14 +104,16 @@ cdk bootstrap --region us-west-2
 cdk deploy --app 'npx ts-node bin/lambda-app.ts' --all --region us-west-2
 
 # 5. Update config with client secret (use same profile)
-./scripts/update-mcp-config.sh your-profile
+./update-mcp-config.sh
 
 # 6. Test deployment
 curl $(jq -r '.endpoint' mcp-server-config.json | sed 's/mcp$/health/')
 
-# 7. Run comprehensive Python tests
-python3 test_lambda_mcp_endpoint.py
+# 7. Test MCP endpoint (optional - requires authentication)
+# See test_lambda_mcp_endpoint.py for comprehensive testing
 ```
+
+**Note**: The Lambda function now uses `lambda_function_v2.handler` with the official MCP SDK.
 
 ## 📋 **Prerequisites**
 
@@ -180,14 +184,11 @@ cdk deploy --app 'npx ts-node bin/lambda-app.ts' PrometheusLambdaMCPAPIGatewaySt
 
 ### 5. Configure Client Secret
 ```bash
-# Make script executable
-chmod +x scripts/update-mcp-config.sh
+# Make script executable (if needed)
+chmod +x update-mcp-config.sh
 
-# Update config with real client secret and ID (use same profile as deployment)
-./scripts/update-mcp-config.sh your-profile-name
-
-# Or use default profile
-./scripts/update-mcp-config.sh
+# Update config with real client secret and ID
+./update-mcp-config.sh
 
 # Verify config file
 cat mcp-server-config.json
@@ -220,21 +221,24 @@ python3 test_lambda_mcp_endpoint.py
 ```
 
 ### 7. Python Test Script
-The included `test_lambda_mcp_endpoint.py` script provides comprehensive testing:
+The included test scripts provide comprehensive testing:
 
 ```bash
-# Install dependencies
-pip install strands-ai requests
+# Run unit tests
+cd lambda-mcp-wrapper/lambda
+python3 test_migration.py
 
-# Run comprehensive tests
-python3 test_lambda_mcp_endpoint.py
+# Run property-based tests
+python3 test_properties.py
 
-# The script tests:
-# - Direct HTTP calls to MCP endpoint
-# - OAuth token retrieval and validation
-# - All 5 MCP tools (GetAvailableWorkspaces, ExecuteQuery, etc.)
-# - Integration with Strands Agent framework
+# Run integration tests (requires AWS credentials)
+AWS_PROFILE=default AWS_REGION=us-east-1 python3 test_integration.py
 ```
+
+**Test Coverage**:
+- 3 unit tests (initialize, tools/list, tool_schema)
+- 8 property-based tests (100+ examples each)
+- 7 integration tests (real AWS services)
 
 ## ⚙️ **Environment Variables**
 
@@ -330,8 +334,8 @@ cdk bootstrap
 
 ### Client Secret Not Found
 ```bash
-# If update-mcp-config.sh fails, make sure to use the correct profile:
-./scripts/update-mcp-config.sh your-profile-name
+# If update-mcp-config.sh fails, run it again:
+./update-mcp-config.sh
 
 # Or check CloudFormation outputs directly:
 aws cloudformation describe-stacks --stack-name PrometheusLambdaMCPCognitoStack --query "Stacks[0].Outputs"
@@ -339,9 +343,8 @@ aws cloudformation describe-stacks --stack-name PrometheusLambdaMCPCognitoStack 
 
 ### CDK Token Error in Config
 ```bash
-# If you see ${Token[TOKEN.XX]} in config file, the script now fixes this automatically
-# by retrieving actual values from CloudFormation outputs instead of CDK tokens
-./scripts/update-mcp-config.sh your-profile-name
+# If you see ${Token[TOKEN.XX]} in config file, run the update script:
+./update-mcp-config.sh
 ```
 
 ### Lambda Function Not Found
@@ -375,6 +378,17 @@ rm -rf cdk.out node_modules
 2. **Monitor Usage**: Check CloudWatch metrics and logs
 3. **Scale**: Lambda auto-scales, no configuration needed
 4. **Integrate**: Use with Strands Agent, Cursor, Cline, etc.
+
+## 🔄 **MCP SDK Migration**
+
+This project has been migrated from manual JSON-RPC handling to the official MCP SDK:
+
+- **Handler**: `lambda_function_v2.handler` (new) vs `lambda_function.handler` (old)
+- **Architecture**: STDIO adapter bridges MCP SDK to Lambda HTTP
+- **Testing**: Comprehensive unit, property-based, and integration tests
+- **Status**: ✅ Deployed and operational
+
+See `MIGRATION_PROGRESS.md` for detailed migration tracking.
 
 ## 📄 **License**
 
