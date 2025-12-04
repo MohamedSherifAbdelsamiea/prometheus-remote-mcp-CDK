@@ -141,12 +141,14 @@ class StdioAdapter:
             
             # Call the tool through the ToolManager
             # The ToolManager handles context injection and execution
+            print(f"DEBUG: Calling tool {tool_name} with arguments: {arguments}")
             result = await self.mcp_server._tool_manager.call_tool(
                 name=tool_name,
                 arguments=arguments,
                 context=None,  # Context will be injected by the tool if needed
                 convert_result=True  # Convert result to MCP format
             )
+            print(f"DEBUG: Tool {tool_name} returned: {type(result)} - {result}")
             
             # Handle None result (FastMCP returns None on some errors)
             if result is None:
