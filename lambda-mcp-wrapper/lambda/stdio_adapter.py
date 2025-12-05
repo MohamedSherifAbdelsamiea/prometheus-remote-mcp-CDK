@@ -15,9 +15,36 @@ The adapter simulates STDIO by:
 import asyncio
 import json
 import sys
+import logging
 from io import StringIO
 from typing import Any, Dict
 from contextlib import redirect_stdout, redirect_stderr
+
+logger = logging.getLogger(__name__)
+
+
+class MockContext:
+    """Minimal Context mock for Lambda environment."""
+    
+    def __init__(self, request_id: str):
+        self.request_id = request_id
+    
+    async def log(self, level: str, message: str, **kwargs):
+        """Log to CloudWatch instead of MCP session."""
+        log_func = getattr(logger, level, logger.info)
+        log_func(f"[{self.request_id}] {message}")
+    
+    async def debug(self, message: str, **kwargs):
+        await self.log("debug", message, **kwargs)
+    
+    async def info(self, message: str, **kwargs):
+        await self.log("info", message, **kwargs)
+    
+    async def warning(self, message: str, **kwargs):
+        await self.log("warning", message, **kwargs)
+    
+    async def error(self, message: str, **kwargs):
+        await self.log("error", message, **kwargs)
 
 
 class StdioAdapter:
@@ -142,11 +169,15 @@ class StdioAdapter:
             # Call the tool through the ToolManager
             # The ToolManager handles context injection and execution
             print(f"DEBUG: Calling tool {tool_name} with arguments: {arguments}")
+            
+            # Create minimal context for logging
+            mock_ctx = MockContext(request_id=str(request_id))
+            
             result = await self.mcp_server._tool_manager.call_tool(
                 name=tool_name,
                 arguments=arguments,
-                context=None,  # Context will be injected by the tool if needed
-                convert_result=True  # Convert result to MCP format
+                context=mock_ctx,
+                convert_result=True
             )
             print(f"DEBUG: Tool {tool_name} returned: {type(result)} - {result}")
             
